@@ -438,7 +438,40 @@ function recalcTramos(){
   for(let i=1;i<5;i++) TRAMOS[i].m2Precio=Math.round(T1+i*d);
 }
 
-const fmt=n=>'S/ '+Math.round(n).toLocaleString('es-PE');
+const API_SHEET = 'https://script.google.com/macros/s/AKfycbwo1g-dH9DyCjzAKA7KpVCNY1tpSxhqApOCWkAflyep83fZbyhNhVIXfz6r1D05fPyR/exec';
+
+async function publicarPrecios(){
+  const btn = event.target;
+  btn.textContent = '⏳ Publicando...';
+  btn.disabled = true;
+  try {
+    const promesas = TRAMOS.map(t =>
+      fetch(API_SHEET, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({action:'actualizarTramo', tramo:t.label, precio:t.m2Precio, meta:t.m2Meta})
+      }).then(r=>r.json())
+    );
+    await Promise.all(promesas);
+    btn.textContent = '✓ Publicado exitosamente';
+    btn.style.background = '#065F46';
+    setTimeout(()=>{
+      btn.textContent = '🚀 Publicar precios al Sheet';
+      btn.style.background = '#059669';
+      btn.disabled = false;
+    }, 3000);
+    alert(`✓ Precios publicados correctamente\n\nT1: S/${TRAMOS[0].m2Precio}/m²\nT2: S/${TRAMOS[1].m2Precio}/m²\nT3: S/${TRAMOS[2].m2Precio}/m²\nT4: S/${TRAMOS[3].m2Precio}/m²\nT5: S/${TRAMOS[4].m2Precio}/m²\n\nLos vendedores verán los nuevos precios en menos de 30 segundos.`);
+  } catch(e) {
+    btn.textContent = '✗ Error — verifica conexión';
+    btn.style.background = '#DC2626';
+    btn.disabled = false;
+    setTimeout(()=>{
+      btn.textContent = '🚀 Publicar precios al Sheet';
+      btn.style.background = '#059669';
+    }, 3000);
+    alert('No se pudo conectar al Sheet. Verifica tu conexión a internet.');
+  }
+}
 const fM2=n=>'S/ '+(Math.round(n*10)/10).toFixed(1);
 const fp =n=>(Math.round(n*10)/10)+'%';
 
@@ -1002,6 +1035,10 @@ function renderParams(c){
       </div>
       <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
         <button class="btn" onclick="recalcTramos();renderAll()">↻ Recalcular precios/m² para cumplir ROI objetivo</button>
+        <button class="btn" onclick="publicarPrecios()" style="background:#059669;border-color:#059669;margin-left:8px">
+          🚀 Publicar precios al Sheet
+        </button>
+        <span style="font-size:10px;color:#90CDF4;margin-left:8px">Envía los 5 precios/m² actuales a los dashboards de vendedores</span>
         <span style="font-size:10px;color:#90CDF4">Fija T1 y redistribuye T2–T5 automáticamente</span>
       </div>
     </div>
