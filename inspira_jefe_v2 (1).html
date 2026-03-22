@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inspira — Jefe de Ventas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:13px;background:#f0f4f8;color:#1a202c}
+header{background:#1F3864;color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:15px;font-weight:700}
+.sub{background:#162c4e;color:#90CDF4;padding:4px 20px;font-size:11px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.sub strong{color:#fff}
+.sync-btn{margin-left:auto;padding:3px 10px;border-radius:10px;border:1px solid #3B82F6;background:transparent;color:#90CDF4;font-size:10px;cursor:pointer;font-weight:600}
+.sync-btn:hover{background:#1E3A8A}
+.con{max-width:1400px;margin:0 auto;padding:12px 16px}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.met{background:#fff;border-radius:8px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.09)}
+.ml{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.mv{font-size:18px;font-weight:700}
+.ms{font-size:10px;color:#888;margin-top:1px}
+.pbar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-top:3px}
+.pfill{height:100%;border-radius:3px;transition:width .4s}
+.tabs{display:flex;gap:2px;border-bottom:2px solid #1F3864;margin-bottom:12px}
+.tab{padding:6px 14px;font-size:12px;cursor:pointer;border:none;background:#e2e8f4;color:#1F3864;font-weight:600;border-radius:4px 4px 0 0;margin-right:2px}
+.tab.active{background:#1F3864;color:#fff}
+.card{background:#fff;border-radius:8px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.st{font-size:10px;font-weight:700;color:#444;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #eee}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:#1F3864;color:#fff;padding:6px 8px;text-align:center;font-weight:600;font-size:10px;text-transform:uppercase;white-space:nowrap;position:sticky;top:0;z-index:1}
+td{padding:4px 7px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+tr:hover td{background:#f5f8ff}
+tfoot td{background:#1F3864;color:#fff;font-weight:700;padding:5px 7px}
+.bv{background:#D1FAE5;color:#065F46;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700}
+.ba{background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700}
+.br{background:#FEE2E2;color:#7F1D1D;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700}
+.alert{padding:8px 12px;border-radius:6px;font-size:11px;margin-bottom:9px;border-left:4px solid;font-weight:500}
+.ao{background:#ECFDF5;color:#065F46;border-color:#10B981}
+.aw{background:#FFFBEB;color:#92400E;border-color:#F59E0B}
+.ai{background:#EFF6FF;color:#1E3A8A;border-color:#3B82F6}
+.ad{background:#FEF2F2;color:#7F1D1D;border-color:#EF4444}
+.tc{padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;display:inline-block}
+.vc{background:#fff;border-radius:8px;padding:11px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(144,205,212,.3);border-top-color:#90CDF4;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{text-align:center;padding:40px;color:#888;font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN JEFE -->
+<div id="jefe-login" style="position:fixed;inset:0;background:#1F3864;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;padding:24px">
+  <div style="font-size:22px;font-weight:700;color:#fff;text-align:center;margin-bottom:6px">CONDOMINIO INSPIRA</div>
+  <div style="font-size:13px;color:#90CDF4;text-align:center;margin-bottom:32px">DE RÍO NEGRO · Panel Jefe de Ventas</div>
+  <div style="background:#fff;border-radius:16px;padding:28px 24px;width:100%;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
+    <div style="font-size:16px;font-weight:700;color:#1F3864;margin-bottom:6px">Acceso restringido</div>
+    <div style="font-size:12px;color:#888;margin-bottom:20px">Solo personal autorizado</div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">Contraseña</label>
+      <input type="password" id="jefe-pass" placeholder="Ingresa la clave"
+        style="width:100%;padding:11px 13px;font-size:15px;border:1.5px solid #d1d5db;border-radius:8px;letter-spacing:4px"
+        onkeydown="if(event.key==='Enter') verificarClave()"/>
+    </div>
+    <div id="jefe-error" style="color:#DC2626;font-size:11px;margin-bottom:8px;display:none">Clave incorrecta. Intenta nuevamente.</div>
+    <button onclick="verificarClave()"
+      style="width:100%;padding:13px;background:#1F3864;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">
+      Ingresar
+    </button>
+  </div>
+  <div style="font-size:11px;color:#4A6FA5;margin-top:20px">Solo para uso del jefe de ventas</div>
+</div>
+
+<script>
+function verificarClave(){
+  const pass = document.getElementById('jefe-pass').value;
+  if(pass === '1234'){
+    document.getElementById('jefe-login').style.display='none';
+    syncFromSheet();
+  } else {
+    document.getElementById('jefe-error').style.display='block';
+    document.getElementById('jefe-pass').value='';
+    document.getElementById('jefe-pass').focus();
+    document.getElementById('jefe-pass').style.borderColor='#DC2626';
+    setTimeout(()=>{
+      document.getElementById('jefe-pass').style.borderColor='#d1d5db';
+    }, 2000);
+  }
+}
+</script>
+
+<header>
+  <div>
+    <h1>CONDOMINIO INSPIRA DE RÍO NEGRO — Jefe de Ventas</h1>
+    <div style="font-size:10px;opacity:.75;margin-top:2px">Panel en tiempo real · Google Sheets</div>
+  </div>
+  <div style="text-align:right;font-size:10px;opacity:.8" id="hdr-r">—</div>
+</header>
+<div class="sub">
+  <span>Inicio: <strong>Marzo 2026</strong></span>
+  <span>112 lotes · Costo: <strong>S/ 2,000,000</strong></span>
+  <span>ROI meta: <strong>40%</strong></span>
+  <span id="sub-sync"><span class="spin"></span>Sincronizando...</span>
+  <button class="sync-btn" onclick="syncAndRender()">↻ Actualizar ahora</button>
+</div>
+
+<div class="con">
+<div class="metrics" id="top-m"><div class="loading">Cargando datos del Sheet...</div></div>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('resumen',this)">Resumen</button>
+  <button class="tab" onclick="showTab('vendedores',this)">Vendedores</button>
+  <button class="tab" onclick="showTab('lotes',this)">Lotes</button>
+  <button class="tab" onclick="showTab('financiero',this)">Financiero</button>
+  <button class="tab" onclick="showTab('ops',this)">Operaciones</button>
+</div>
+<div id="tab-resumen"><div class="loading">Cargando...</div></div>
+<div id="tab-vendedores" style="display:none"></div>
+<div id="tab-lotes"      style="display:none"></div>
+<div id="tab-financiero" style="display:none"></div>
+<div id="tab-ops"        style="display:none"></div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const API = 'https://script.google.com/macros/s/AKfycbwo1g-dH9DyCjzAKA7KpVCNY1tpSxhqApOCWkAflyep83fZbyhNhVIXfz6r1D05fPyR/exec';
+const CFG = {costo:2000000, roiMeta:40, ir:29.5, comision:10, comFijo:15};
+const VENDEDORES = ['Vendedor 1','Vendedor 2','Vendedor 3','Vendedor 4','Vendedor 5','Vendedor 6','Vendedor 7'];
+const TC  = ['#7C3AED','#2563EB','#059669','#D97706','#DC2626'];
+const TBG = ['#EDE9FE','#DBEAFE','#D1FAE5','#FEF3C7','#FEE2E2'];
+const TTC = ['#4C1D95','#1E3A8A','#065F46','#92400E','#7F1D1D'];
+
+const ATTRS = {
+  esquina:{lbl:'Esquina',pct:15},ingreso:{lbl:'Cerca ingreso',pct:10},
+  rio:{lbl:'Vista río',pct:12},amenidad:{lbl:'Amenidades',pct:8},
+  fondo:{lbl:'Fondo manzana',pct:-8},lejos:{lbl:'Lejos ingreso',pct:-7},
+};
+
+const LOTES_FIJOS = [
+  {mz:'C',lt:2,area:200,est:'vendido',  pf:16400,vendedor:'Vendedor 1',cliente:'Cliente A'},
+  {mz:'C',lt:3,area:200,est:'vendido',  pf:18400,vendedor:'Vendedor 2',cliente:'Cliente B'},
+  {mz:'H',lt:7,area:180,est:'vendido',  pf:15200,vendedor:'Vendedor 3',cliente:'Cliente C'},
+  {mz:'H',lt:8,area:180,est:'vendido',  pf:15200,vendedor:'Vendedor 1',cliente:'Cliente D'},
+  {mz:'H',lt:1,area:206,est:'reservado',pf:23900,vendedor:'Vendedor 2',cliente:'Cliente E'},
+  {mz:'H',lt:2,area:180,est:'reservado',pf:16600,vendedor:'Vendedor 4',cliente:'Cliente F'},
+  {mz:'H',lt:3,area:180,est:'reservado',pf:16600,vendedor:'Vendedor 5',cliente:'Cliente G'},
+  {mz:'H',lt:4,area:180,est:'reservado',pf:16600,vendedor:'Vendedor 6',cliente:'Cliente H'},
+  {mz:'I',lt:3,area:229,est:'reservado',pf:21000,vendedor:'Vendedor 7',cliente:'Cliente I'},
+  {mz:'J',lt:2,area:150,est:'reservado',pf:13700,vendedor:'Vendedor 4',cliente:'Cliente J'},
+  {mz:'C',lt:4,area:200,est:'reservado',pf:18400,vendedor:'Vendedor 3',cliente:'Cliente K'},
+];
+
+const POOL = [
+  {mz:'A',lt:1,area:272,attrs:['ingreso']},{mz:'A',lt:2,area:188,attrs:['fondo']},
+  {mz:'A',lt:3,area:222,attrs:[]},{mz:'A',lt:4,area:249,attrs:[]},
+  {mz:'A',lt:5,area:298,attrs:['esquina','rio']},
+  {mz:'B',lt:1,area:179,attrs:['esquina']},{mz:'B',lt:2,area:200,attrs:[]},
+  {mz:'B',lt:3,area:200,attrs:[]},{mz:'B',lt:4,area:200,attrs:[]},
+  {mz:'B',lt:5,area:200,attrs:[]},{mz:'B',lt:6,area:200,attrs:['fondo']},
+  {mz:'B',lt:7,area:200,attrs:['fondo']},{mz:'B',lt:8,area:200,attrs:[]},
+  {mz:'B',lt:9,area:200,attrs:[]},{mz:'B',lt:10,area:200,attrs:[]},
+  {mz:'B',lt:11,area:200,attrs:[]},{mz:'B',lt:12,area:200,attrs:[]},
+  {mz:'B',lt:13,area:172,attrs:['esquina']},
+  {mz:'C',lt:1,area:202,attrs:['esquina']},{mz:'C',lt:5,area:200,attrs:[]},
+  {mz:'C',lt:6,area:200,attrs:['fondo']},{mz:'C',lt:7,area:200,attrs:['fondo']},
+  {mz:'C',lt:8,area:200,attrs:[]},{mz:'C',lt:9,area:200,attrs:[]},
+  {mz:'C',lt:10,area:200,attrs:[]},{mz:'C',lt:11,area:200,attrs:[]},
+  {mz:'C',lt:12,area:200,attrs:[]},{mz:'C',lt:13,area:200,attrs:[]},
+  {mz:'C',lt:14,area:200,attrs:[]},{mz:'C',lt:15,area:200,attrs:[]},
+  {mz:'C',lt:16,area:200,attrs:[]},{mz:'C',lt:17,area:169,attrs:['esquina']},
+  {mz:'E',lt:1,area:228,attrs:['esquina','amenidad']},{mz:'E',lt:2,area:200,attrs:['amenidad']},
+  {mz:'E',lt:3,area:200,attrs:[]},{mz:'E',lt:4,area:200,attrs:[]},
+  {mz:'E',lt:5,area:200,attrs:[]},{mz:'E',lt:6,area:200,attrs:[]},
+  {mz:'E',lt:7,area:200,attrs:[]},{mz:'E',lt:8,area:200,attrs:[]},
+  {mz:'E',lt:9,area:200,attrs:[]},{mz:'E',lt:10,area:200,attrs:[]},
+  {mz:'E',lt:11,area:200,attrs:[]},{mz:'E',lt:12,area:200,attrs:[]},
+  {mz:'E',lt:13,area:211,attrs:[]},{mz:'E',lt:14,area:223,attrs:[]},
+  {mz:'E',lt:15,area:198,attrs:[]},{mz:'E',lt:16,area:200,attrs:[]},
+  {mz:'E',lt:17,area:200,attrs:[]},{mz:'E',lt:18,area:200,attrs:[]},
+  {mz:'E',lt:19,area:200,attrs:[]},{mz:'E',lt:20,area:200,attrs:[]},
+  {mz:'E',lt:21,area:200,attrs:[]},{mz:'E',lt:22,area:200,attrs:[]},
+  {mz:'E',lt:23,area:200,attrs:[]},{mz:'E',lt:24,area:200,attrs:[]},
+  {mz:'E',lt:25,area:200,attrs:[]},{mz:'E',lt:26,area:284,attrs:['esquina']},
+  {mz:'F',lt:1,area:208,attrs:['esquina','amenidad']},{mz:'F',lt:2,area:200,attrs:['amenidad']},
+  {mz:'F',lt:3,area:200,attrs:[]},{mz:'F',lt:4,area:200,attrs:[]},
+  {mz:'F',lt:5,area:222,attrs:['esquina']},{mz:'F',lt:6,area:256,attrs:[]},
+  {mz:'F',lt:7,area:192,attrs:['fondo']},{mz:'F',lt:8,area:179,attrs:['fondo','lejos']},
+  {mz:'F',lt:9,area:198,attrs:['esquina']},
+  {mz:'G',lt:1,area:188,attrs:['esquina']},{mz:'G',lt:2,area:200,attrs:[]},
+  {mz:'G',lt:3,area:200,attrs:[]},{mz:'G',lt:4,area:200,attrs:[]},
+  {mz:'G',lt:5,area:200,attrs:[]},{mz:'G',lt:6,area:200,attrs:['fondo']},
+  {mz:'G',lt:7,area:191,attrs:['fondo']},{mz:'G',lt:8,area:313,attrs:['esquina','rio']},
+  {mz:'G',lt:9,area:200,attrs:[]},{mz:'G',lt:10,area:200,attrs:[]},
+  {mz:'G',lt:11,area:200,attrs:[]},{mz:'G',lt:12,area:200,attrs:[]},
+  {mz:'G',lt:13,area:200,attrs:[]},{mz:'G',lt:14,area:244,attrs:['esquina','ingreso']},
+  {mz:'H',lt:5,area:180,attrs:[]},{mz:'H',lt:6,area:180,attrs:[]},
+  {mz:'H',lt:9,area:288,attrs:['esquina']},
+  {mz:'I',lt:1,area:210,attrs:['esquina']},{mz:'I',lt:2,area:211,attrs:[]},
+  {mz:'J',lt:1,area:150,attrs:['esquina']},{mz:'J',lt:3,area:150,attrs:[]},
+  {mz:'J',lt:4,area:151,attrs:['esquina']},
+  {mz:'K',lt:1,area:150,attrs:['esquina']},{mz:'K',lt:2,area:150,attrs:['lejos']},
+  {mz:'K',lt:3,area:150,attrs:['lejos']},{mz:'K',lt:4,area:90,attrs:['lejos','fondo']},
+  {mz:'K',lt:5,area:150,attrs:['lejos']},{mz:'K',lt:6,area:150,attrs:['lejos']},
+  {mz:'K',lt:7,area:150,attrs:['lejos']},{mz:'K',lt:8,area:150,attrs:['esquina']},
+  {mz:'L',lt:1,area:150,attrs:['lejos']},{mz:'L',lt:2,area:150,attrs:['lejos']},
+  {mz:'L',lt:3,area:150,attrs:['lejos']},{mz:'L',lt:4,area:150,attrs:['lejos','esquina']},
+];
+
+// ── ESTADO ────────────────────────────────────────────────────────────────────
+let tramosData = [
+  {label:'T1',precio:120,meta:4182,m2Acum:0,periodo:'Mar–Jul 2026'},
+  {label:'T2',precio:143,meta:3997,m2Acum:0,periodo:'Ago–Dic 2026'},
+  {label:'T3',precio:167,meta:4124,m2Acum:0,periodo:'Ene–May 2027'},
+  {label:'T4',precio:190,meta:4139,m2Acum:0,periodo:'Jun–Oct 2027'},
+  {label:'T5',precio:214,meta:3504,m2Acum:0,periodo:'Nov 2027–Feb 2028'},
+];
+let opsSheet = [];
+let activeTab = 'resumen';
+let lastSync = null;
+
+const fmt = n => 'S/ ' + Math.round(n).toLocaleString('es-PE');
+const fM2 = n => 'S/ ' + (Math.round(n*10)/10).toFixed(1);
+const fp  = n => (Math.round(n*10)/10) + '%';
+
+function tramoActivo() {
+  for (let i=0;i<5;i++) if(tramosData[i].m2Acum < tramosData[i].meta) return i;
+  return 4;
+}
+function precioPoolLote(l) {
+  const ta = tramoActivo();
+  let ap = 0; (l.attrs||[]).forEach(a=>{if(ATTRS[a])ap+=ATTRS[a].pct;});
+  return Math.round(l.area * tramosData[ta].precio * (1+ap/100));
+}
+
+// ── SYNC ──────────────────────────────────────────────────────────────────────
+async function syncFromSheet() {
+  document.getElementById('sub-sync').innerHTML = '<span class="spin"></span>Sincronizando...';
+  try {
+    const [rOps, rTramos] = await Promise.all([
+      fetch(API+'?action=getOps').then(r=>r.json()),
+      fetch(API+'?action=getTramos').then(r=>r.json())
+    ]);
+    if (rOps.ok)    opsSheet = rOps.data || [];
+    if (rTramos.ok && rTramos.data) {
+      rTramos.data.forEach(row => {
+        const t = tramosData.find(t=>t.label===row.tramo);
+        if (t) { t.m2Acum = +row.m2||0; t.precio = +row.precio||t.precio; }
+      });
+    }
+    // Actualizar estado del pool
+    POOL.forEach(l => { if(l.est!=='vendido'&&l.est!=='reservado') l.est='disponible'; });
+    opsSheet.forEach(op => {
+      const l = POOL.find(x=>x.mz===op.manzana&&x.lt==op.lote);
+      if (l) { l.est=op.tipo==='venta'?'vendido':'reservado'; l.vendedor=op.vendedor; l.cliente=op.cliente; l.precio=+op.precio; }
+    });
+    lastSync = new Date();
+    document.getElementById('sub-sync').textContent = '✓ Actualizado ' + lastSync.toLocaleTimeString('es-PE');
+    renderAll();
+  } catch(e) {
+    document.getElementById('sub-sync').textContent = '⚠ Sin conexión';
+    renderAll();
+  }
+}
+
+function syncAndRender() { syncFromSheet(); }
+
+// ── CÁLCULO FINANCIERO ────────────────────────────────────────────────────────
+function calcAll() {
+  const ta = tramoActivo();
+  const ingFijo  = LOTES_FIJOS.reduce((s,l)=>s+(l.pf||0),0);
+  const comFijo  = Math.round(ingFijo*CFG.comFijo/100);
+  const ingPool  = opsSheet.reduce((s,o)=>s+(+o.precio||0),0);
+  const comPool  = Math.round(ingPool*CFG.comision/100);
+
+  // Proyección lotes disponibles
+  let ingProy=0, m2Sim=[...tramosData.map(t=>t.m2Acum)], tSim=ta;
+  const disp = POOL.filter(l=>l.est==='disponible').sort((a,b)=>b.area-a.area);
+  for(const l of disp){
+    let ap=0; (l.attrs||[]).forEach(a=>{if(ATTRS[a])ap+=ATTRS[a].pct;});
+    const p=Math.round(l.area*tramosData[tSim].precio*(1+ap/100));
+    ingProy+=p; m2Sim[tSim]+=l.area;
+    if(m2Sim[tSim]>=tramosData[tSim].meta&&tSim<4) tSim++;
+  }
+  const comProy = Math.round(ingProy*CFG.comision/100);
+  const ingTotal  = ingFijo+ingPool+ingProy;
+  const comTotal  = comFijo+comPool+comProy;
+  const netoTotal = ingTotal-comTotal;
+  const utilBruta = netoTotal-CFG.costo;
+  const ir        = utilBruta>0?Math.round(utilBruta*CFG.ir/100):0;
+  const utilNeta  = utilBruta-ir;
+  const roi       = Math.round(utilNeta/CFG.costo*1000)/10;
+  const bMeta     = (CFG.costo*CFG.roiMeta/100/(1-CFG.ir/100)+CFG.costo)/(1-CFG.comision/100);
+  const gap       = ingTotal-bMeta;
+
+  // Por vendedor
+  const porVend = VENDEDORES.map(v => {
+    const fOps = LOTES_FIJOS.filter(l=>l.vendedor===v);
+    const sOps = opsSheet.filter(o=>o.vendedor===v);
+    const ventas  = fOps.filter(l=>l.est==='vendido').length + sOps.filter(o=>o.tipo==='venta').length;
+    const reservas= fOps.filter(l=>l.est==='reservado').length + sOps.filter(o=>o.tipo==='reserva').length;
+    const ingV    = fOps.reduce((s,l)=>s+(l.pf||0),0) + sOps.reduce((s,o)=>s+(+o.precio||0),0);
+    const comF    = Math.round(fOps.reduce((s,l)=>s+(l.pf||0),0)*CFG.comFijo/100);
+    const comS    = Math.round(sOps.reduce((s,o)=>s+(+o.precio||0),0)*CFG.comision/100);
+    const m2v     = fOps.filter(l=>l.est==='vendido').reduce((s,l)=>s+l.area,0) +
+                    sOps.filter(o=>o.tipo==='venta').reduce((s,o)=>s+(+o.area||0),0);
+    return {nombre:v, ventas, reservas, com:comF+comS, m2:m2v, ingreso:ingV};
+  });
+
+  const vend = [...LOTES_FIJOS,...POOL].filter(l=>l.est==='vendido');
+  const res  = [...LOTES_FIJOS,...POOL].filter(l=>l.est==='reservado');
+  const dispL= POOL.filter(l=>l.est==='disponible');
+
+  return {ta,ingFijo,ingPool,ingTotal,comTotal,netoTotal,utilBruta,ir,utilNeta,roi,bMeta,gap,porVend,vend,res,dispL};
+}
+
+// ── RENDER TOP ────────────────────────────────────────────────────────────────
+function renderTop(c) {
+  const ta=c.ta, t=tramosData[ta];
+  const rc=c.roi>=CFG.roiMeta?'#065F46':c.roi>=30?'#92400E':'#7F1D1D';
+  const gp=Math.min(100,Math.round(c.ingTotal/c.bMeta*100));
+  document.getElementById('top-m').innerHTML=`
+    <div class="met"><div class="ml">Tramo activo</div>
+      <div class="mv" style="color:${TC[ta]};font-size:15px">${t.label} — S/${t.precio}/m²</div>
+      <div class="ms">${t.periodo}</div>
+      <div class="pbar"><div class="pfill" style="width:${Math.min(100,Math.round(t.m2Acum/t.meta*100))}%;background:${TC[ta]}"></div></div>
+      <div class="ms">${t.m2Acum}/${t.meta} m² · faltan ${t.meta-t.m2Acum} m²</div>
+    </div>
+    <div class="met"><div class="ml">Vendidos / Reservados</div>
+      <div class="mv"><span style="color:#DC2626">${c.vend.length}</span> / <span style="color:#D97706">${c.res.length}</span></div>
+      <div class="ms">${c.dispL.length} disponibles</div>
+    </div>
+    <div class="met"><div class="ml">Ingreso captado</div>
+      <div class="mv" style="font-size:14px;color:#065F46">${fmt(c.ingFijo+c.ingPool)}</div>
+      <div class="pbar"><div class="pfill" style="width:${gp}%;background:${c.gap>=0?'#10B981':'#EF4444'}"></div></div>
+      <div class="ms">${c.gap>=0?'✓ +'+fmt(c.gap)+' sobre meta':'✗ Falta '+fmt(-c.gap)}</div>
+    </div>
+    <div class="met" style="background:${c.roi>=CFG.roiMeta?'#ECFDF5':'#FEF2F2'}">
+      <div class="ml">ROI proyectado</div>
+      <div class="mv" style="font-size:22px;color:${rc}">${fp(c.roi)}</div>
+      <div class="ms">${c.roi>=CFG.roiMeta?'✓ Meta cumplida':'Meta: '+fp(CFG.roiMeta)}</div>
+    </div>
+    <div class="met"><div class="ml">Comisiones totales</div>
+      <div class="mv" style="font-size:14px;color:#92400E">${fmt(c.comTotal)}</div>
+      <div class="ms">${c.porVend.filter(v=>v.com>0).length} vendedores activos</div>
+    </div>
+  `;
+  document.getElementById('hdr-r').textContent = `ROI: ${fp(c.roi)} · ${c.vend.length} vend · ${c.res.length} res · ${c.dispL.length} disp`;
+}
+
+// ── TAB RESUMEN ───────────────────────────────────────────────────────────────
+function renderResumen(c) {
+  const ta = c.ta;
+  const grandesDisp = POOL.filter(l=>l.est==='disponible'&&l.area>250);
+  const alertas = [];
+  if (grandesDisp.length>0) alertas.push({cls:'aw',txt:`⭐ ${grandesDisp.length} lotes grandes (>250m²) disponibles — priorizar venta antes que suba el precio`});
+  if (c.roi<CFG.roiMeta) alertas.push({cls:'ad',txt:`⚠ ROI ${fp(c.roi)} por debajo de meta ${fp(CFG.roiMeta)} — faltan ${fmt(c.bMeta-c.ingTotal)} de ingreso bruto`});
+  if (c.res.length>3) alertas.push({cls:'ai',txt:`📋 ${c.res.length} reservas pendientes de convertir a venta`});
+  const pctTramo = Math.min(100,Math.round(tramosData[ta].m2Acum/tramosData[ta].meta*100));
+  if (pctTramo>=80) alertas.push({cls:'ao',txt:`🎯 ${tramosData[ta].label} al ${pctTramo}% — preparar anuncio de subida de precio al equipo de ventas`});
+
+  const progBars = tramosData.map((t,i)=>{
+    const pct=Math.min(100,Math.round(t.m2Acum/t.meta*100));
+    const comp=t.m2Acum>=t.meta, activo=i===ta&&!comp;
+    return`<div style="margin-bottom:9px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+        <div style="display:flex;align-items:center;gap:7px">
+          <span class="tc" style="background:${TBG[i]};color:${TTC[i]}">${t.label} · S/${t.precio}/m²</span>
+          <span style="font-size:10px;color:#666">${t.periodo}</span>
+          ${comp?`<span style="font-size:9px;background:#DBEAFE;color:#1E3A8A;padding:1px 6px;border-radius:8px;font-weight:700">✓ Completado</span>`:
+            activo?`<span style="font-size:9px;background:#D1FAE5;color:#065F46;padding:1px 6px;border-radius:8px;font-weight:700">● Activo</span>`:
+            `<span style="font-size:9px;background:#F3F4F6;color:#9CA3AF;padding:1px 6px;border-radius:8px;font-weight:700">Pendiente</span>`}
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${TTC[i]}">${t.m2Acum.toLocaleString()} / ${t.meta.toLocaleString()} m²</span>
+      </div>
+      <div style="height:12px;background:#f0f0f0;border-radius:6px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${comp?'#3B82F6':TC[i]};border-radius:6px;display:flex;align-items:center;padding-left:6px">
+          ${pct>8?`<span style="font-size:9px;color:#fff;font-weight:700">${pct}%</span>`:''}
+        </div>
+      </div>
+      ${activo?`<div style="font-size:10px;color:${TTC[i]};margin-top:2px">Faltan ${(t.meta-t.m2Acum).toLocaleString()} m² → sube a ${i<4?TRAMOS_LABELS[i+1]:'precio final'}</div>`:''}
+    </div>`;
+  }).join('');
+
+  const rankRows = [...c.porVend].sort((a,b)=>b.ventas-a.ventas).map((v,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f5f5f5">
+      <div style="font-size:14px;font-weight:700;color:${i===0?'#D97706':i===1?'#9CA3AF':i===2?'#C57B3A':'#888'};min-width:22px">${i+1}</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700">${v.nombre}</div>
+        <div style="font-size:10px;color:#888">${v.ventas} ventas · ${v.reservas} res · ${v.m2} m²</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;font-weight:700;color:#059669">${fmt(v.com)}</div>
+        <div style="font-size:9px;color:#888">comisión</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('tab-resumen').innerHTML=`
+    ${alertas.map(a=>`<div class="alert ${a.cls}">${a.txt}</div>`).join('')}
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px">
+      <div class="card"><div class="st">Progreso de tramos — m² vendidos vs meta</div>${progBars}</div>
+      <div>
+        <div class="card"><div class="st">Ranking de vendedores</div>${rankRows}</div>
+        <div class="card">
+          <div class="st">Resumen financiero</div>
+          <table style="font-size:11px">
+            <tr><td style="color:#555;padding:2px 0">Captado real</td><td style="text-align:right;font-weight:700;color:#065F46">${fmt(c.ingFijo+c.ingPool)}</td></tr>
+            <tr><td style="color:#555;padding:2px 0">Total proyectado</td><td style="text-align:right;font-weight:700">${fmt(c.ingTotal)}</td></tr>
+            <tr><td style="color:#555;padding:2px 0">IR estimado</td><td style="text-align:right;font-weight:700;color:#7F1D1D">${fmt(c.ir)}</td></tr>
+            <tr><td style="color:#555;padding:2px 0">Utilidad neta</td><td style="text-align:right;font-weight:700;color:${c.utilNeta>0?'#065F46':'#7F1D1D'}">${fmt(c.utilNeta)}</td></tr>
+            <tr><td style="color:#555;padding:2px 0">ROI</td><td style="text-align:right;font-weight:700;color:${c.roi>=CFG.roiMeta?'#065F46':'#DC2626'}">${fp(c.roi)}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+const TRAMOS_LABELS = ['T1','T2','T3','T4','T5'];
+
+// ── TAB VENDEDORES ────────────────────────────────────────────────────────────
+function renderVendedores(c) {
+  const cards = c.porVend.map(v=>`
+    <div class="vc">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="width:34px;height:34px;border-radius:50%;background:#1F3864;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0">
+          ${v.nombre.replace('Vendedor ','V')}
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700">${v.nombre}</div>
+          <div style="font-size:10px;color:#888">${v.ventas} ventas · ${v.reservas} reservas · ${v.m2} m²</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;font-weight:700;color:#059669">${fmt(v.com)}</div>
+          <div style="font-size:9px;color:#888">comisión</div>
+        </div>
+      </div>
+      <div class="pbar"><div class="pfill" style="width:${Math.min(100,v.ventas/15*100)}%;background:#1F3864"></div></div>
+    </div>`).join('');
+
+  document.getElementById('tab-vendedores').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:12px">${cards}</div>
+    <div class="card">
+      <div class="st">Comisiones por pagar</div>
+      <div class="tw"><table>
+        <thead><tr><th>Vendedor</th><th>Ventas</th><th>Reservas</th><th>m²</th><th>Comisión (S/)</th><th>Estado</th></tr></thead>
+        <tbody>
+          ${c.porVend.map(v=>`<tr>
+            <td style="font-weight:700">${v.nombre}</td>
+            <td style="text-align:center">${v.ventas}</td>
+            <td style="text-align:center">${v.reservas}</td>
+            <td style="text-align:right">${v.m2} m²</td>
+            <td style="text-align:right;font-weight:700;color:#059669">${fmt(v.com)}</td>
+            <td style="text-align:center"><span class="${v.com>0?'ba':'bv'}">${v.com>0?'Pendiente':'—'}</span></td>
+          </tr>`).join('')}
+        </tbody>
+        <tfoot><tr>
+          <td>TOTAL</td>
+          <td style="text-align:center">${c.porVend.reduce((s,v)=>s+v.ventas,0)}</td>
+          <td style="text-align:center">${c.porVend.reduce((s,v)=>s+v.reservas,0)}</td>
+          <td style="text-align:right">${c.porVend.reduce((s,v)=>s+v.m2,0)} m²</td>
+          <td style="text-align:right">${fmt(c.porVend.reduce((s,v)=>s+v.com,0))}</td>
+          <td></td>
+        </tr></tfoot>
+      </table></div>
+    </div>
+  `;
+}
+
+// ── TAB LOTES ─────────────────────────────────────────────────────────────────
+function renderLotes(c) {
+  const ta = c.ta;
+  const todos = [...LOTES_FIJOS, ...POOL];
+  const rows = todos.map(l=>{
+    const esFijo = LOTES_FIJOS.includes(l);
+    const precio = esFijo?(l.pf||0):(l.precio||precioPoolLote(l));
+    const m2p = Math.round(precio/l.area*10)/10;
+    const com = esFijo?Math.round(precio*CFG.comFijo/100):Math.round(precio*CFG.comision/100);
+    const bc = l.est==='vendido'?'br':l.est==='reservado'?'ba':'bv';
+    const grande = !esFijo&&l.area>250;
+    return`<tr style="${grande?'background:#FFFBEB':''}">
+      <td style="text-align:center;font-weight:700">${l.mz}</td>
+      <td style="text-align:center">${l.lt}</td>
+      <td style="text-align:right">${l.area}${grande?' ⭐':''}</td>
+      <td style="text-align:right;font-weight:700">${fmt(precio)}</td>
+      <td style="text-align:right">${fM2(m2p)}</td>
+      <td style="text-align:right;color:#92400E">${fmt(com)} <span style="font-size:9px">(${esFijo?CFG.comFijo:CFG.comision}%)</span></td>
+      <td style="text-align:center"><span class="${bc}">${l.est}</span>${esFijo?` <span style="font-size:9px;background:#F3F4F6;color:#555;padding:1px 5px;border-radius:5px">prev.</span>`:''}</td>
+      <td>${l.vendedor||'—'}</td>
+      <td>${l.cliente||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('tab-lotes').innerHTML=`
+    <div class="card"><div class="tw"><table>
+      <thead><tr><th>Mz</th><th>Lt</th><th>m²</th><th>Precio</th><th>S/m²</th><th>Comisión</th><th>Estado</th><th>Vendedor</th><th>Cliente</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div></div>
+  `;
+}
+
+// ── TAB FINANCIERO ────────────────────────────────────────────────────────────
+function renderFinanciero(c) {
+  const wf=[
+    {l:'Ingreso bruto total proyectado',v:c.ingTotal,col:'#3B82F6'},
+    {l:`− Comisión (${CFG.comFijo}% preventa + ${CFG.comision}% tramos)`,v:-c.comTotal,col:'#F87171'},
+    {l:'= Ingreso neto ventas',v:c.netoTotal,col:'#6B7280'},
+    {l:'− Costo del proyecto (S/ 2,000,000)',v:-CFG.costo,col:'#F87171'},
+    {l:'= Utilidad bruta',v:c.utilBruta,col:c.utilBruta>0?'#34D399':'#F87171'},
+    {l:`− IR ${CFG.ir}% Régimen General`,v:-c.ir,col:'#F87171'},
+    {l:'= UTILIDAD NETA',v:c.utilNeta,col:c.utilNeta>0?'#10B981':'#EF4444',bold:true},
+  ];
+  const maxV=Math.max(...wf.map(x=>Math.abs(x.v)));
+  const bars=wf.map(w=>{
+    const w100=Math.round(Math.abs(w.v)/maxV*100);
+    return`<div style="margin-bottom:6px">
+      <div style="font-size:11px;color:#444;margin-bottom:1px;font-weight:${w.bold?'700':'400'}">${w.l}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="flex:1;height:20px;background:#f0f0f0;border-radius:3px;overflow:hidden">
+          <div style="width:${Math.max(w100,2)}%;height:100%;background:${w.col};border-radius:3px;display:flex;align-items:center;padding:0 6px">
+            <span style="font-size:9px;font-weight:700;color:#fff;white-space:nowrap">${fmt(Math.abs(w.v))}</span>
+          </div>
+        </div>
+        <span style="font-size:11px;font-weight:${w.bold?'700':'400'};color:${w.v<0?'#7F1D1D':'#1a202c'};min-width:115px;text-align:right">${w.v<0?'−':'+'}${fmt(Math.abs(w.v))}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const alertC=c.roi>=CFG.roiMeta?'ao':c.utilNeta>0?'aw':'ad';
+  document.getElementById('tab-financiero').innerHTML=`
+    <div class="alert ${alertC}">${c.roi>=CFG.roiMeta?`✓ ROI ${fp(c.roi)} — supera meta ${fp(CFG.roiMeta)}. Utilidad neta: ${fmt(c.utilNeta)}.`:`⚠ ROI ${fp(c.roi)}. Falta ${fmt(c.bMeta-c.ingTotal)} de ingreso bruto para meta ${fp(CFG.roiMeta)}.`}</div>
+    <div style="display:grid;grid-template-columns:3fr 2fr;gap:10px">
+      <div class="card"><div class="st">Cascada financiera</div>${bars}</div>
+      <div class="card"><div class="st">Indicadores</div>
+        <table style="font-size:11px">
+          ${[['ROI proyectado',fp(c.roi),c.roi>=CFG.roiMeta?'#065F46':'#DC2626'],
+             ['Utilidad neta',fmt(c.utilNeta),c.utilNeta>0?'#065F46':'#7F1D1D'],
+             ['IR estimado',fmt(c.ir),'#7F1D1D'],['Margen neto',fp(Math.round(c.utilNeta/c.ingTotal*1000)/10),'#1a202c'],
+             ['Ingreso captado',fmt(c.ingFijo+c.ingPool),'#065F46'],['Total proyectado',fmt(c.ingTotal),'#1a202c'],
+            ].map(([l,v,col])=>`<tr><td style="color:#555;padding:3px 0">${l}</td><td style="text-align:right;font-weight:700;color:${col}">${v}</td></tr>`).join('')}
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+// ── TAB OPERACIONES ───────────────────────────────────────────────────────────
+function renderOps() {
+  const fOps = LOTES_FIJOS.map(l=>({
+    manzana:l.mz, lote:l.lt, area:l.area, precio:l.pf||0,
+    comision:Math.round((l.pf||0)*CFG.comFijo/100),
+    tipo:l.est==='vendido'?'venta':'reserva',
+    tramo:'Preventa', vendedor:l.vendedor||'—',
+    cliente:l.cliente||'—', dni:'—', fecha:'Feb 2026'
+  }));
+  const todas = [...fOps, ...opsSheet.map(o=>({...o, comision:Math.round((+o.precio||0)*CFG.comision/100)}))];
+
+  const rows = todas.map(o=>`<tr>
+    <td style="text-align:center;font-weight:700">${o.manzana}-${o.lote}</td>
+    <td style="text-align:right">${o.area}m²</td>
+    <td style="text-align:center"><span class="tc" style="background:#f0f4f8;color:#555">${o.tramo}</span></td>
+    <td style="text-align:center"><span class="${o.tipo==='venta'?'bv':'ba'}">${o.tipo}</span></td>
+    <td style="text-align:right;font-weight:700">${fmt(+o.precio||0)}</td>
+    <td style="text-align:right;color:#059669">${fmt(+o.comision||0)}</td>
+    <td>${o.vendedor}</td>
+    <td>${o.cliente}</td>
+    <td>${o.dni||'—'}</td>
+    <td>${o.fecha}</td>
+  </tr>`).join('');
+
+  document.getElementById('tab-ops').innerHTML=`
+    <div class="card"><div class="tw"><table>
+      <thead><tr><th>Lote</th><th>m²</th><th>Tramo</th><th>Tipo</th><th>Precio</th><th>Comisión</th><th>Vendedor</th><th>Cliente</th><th>DNI</th><th>Fecha</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr>
+        <td colspan="4">TOTAL (${todas.length})</td>
+        <td style="text-align:right">${fmt(todas.reduce((s,o)=>s+(+o.precio||0),0))}</td>
+        <td style="text-align:right">${fmt(todas.reduce((s,o)=>s+(+o.comision||0),0))}</td>
+        <td colspan="4"></td>
+      </tr></tfoot>
+    </table></div></div>
+  `;
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function showTab(t,el){
+  activeTab=t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  if(el) el.classList.add('active');
+  ['resumen','vendedores','lotes','financiero','ops'].forEach(id=>{
+    document.getElementById('tab-'+id).style.display=id===t?'block':'none';
+  });
+  renderAll();
+}
+
+function renderAll(){
+  const c=calcAll();
+  renderTop(c);
+  if(activeTab==='resumen')    renderResumen(c);
+  if(activeTab==='vendedores') renderVendedores(c);
+  if(activeTab==='lotes')      renderLotes(c);
+  if(activeTab==='financiero') renderFinanciero(c);
+  if(activeTab==='ops')        renderOps();
+}
+
+// Auto-sync cada 30 segundos (se inicia solo después del login)
+setInterval(()=>{ if(document.getElementById("jefe-login").style.display==="none") syncFromSheet(); }, 30000);
+</script>
+</body>
+</html>

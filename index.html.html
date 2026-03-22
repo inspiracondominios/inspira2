@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Inspira — Vendedor</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:Arial,sans-serif;font-size:14px;background:#f0f4f8;color:#1a202c;max-width:480px;margin:0 auto;min-height:100vh}
+header{background:#1F3864;color:#fff;padding:11px 16px;position:sticky;top:0;z-index:50}
+.h-top{display:flex;align-items:center;justify-content:space-between}
+.h-title{font-size:14px;font-weight:700}
+.h-sub{font-size:10px;opacity:.75;margin-top:1px}
+.tramo-badge{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;text-align:center;margin-top:7px}
+.nav{display:flex;background:#fff;border-bottom:2px solid #e2e8f0;position:sticky;top:68px;z-index:40;box-shadow:0 2px 4px rgba(0,0,0,.06)}
+.nb{flex:1;padding:9px 4px;font-size:11px;font-weight:700;border:none;background:none;color:#888;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nb.active{color:#1F3864;border-bottom:2px solid #1F3864;margin-bottom:-2px}
+.ni{font-size:17px}
+.con{padding:10px 12px 80px}
+.card{background:#fff;border-radius:10px;padding:12px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.st{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.met{background:#f8fafc;border-radius:8px;padding:9px;text-align:center}
+.ml{font-size:10px;color:#666;margin-bottom:1px}
+.mv{font-size:19px;font-weight:700}
+/* Filtros 2 filas */
+.flt-wrap{margin-bottom:10px}
+.flt{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px}
+.fb{padding:5px 11px;border-radius:20px;border:1.5px solid #d1d5db;background:#fff;font-size:11px;font-weight:600;color:#555;cursor:pointer;white-space:nowrap}
+.fb.on{background:#1F3864;color:#fff;border-color:#1F3864}
+/* Lotes */
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lc{border-radius:8px;padding:10px;border:2px solid #e2e8f0;cursor:pointer;position:relative;transition:all .15s;background:#fff}
+.lc:active{transform:scale(.97)}
+.lc.grande{border-color:#D97706;background:#FFFBEB}
+.lc.vendido{background:#FEE2E2;border-color:#FCA5A5;cursor:default;opacity:.7}
+.lc.reservado{background:#FEF3C7;border-color:#FCD34D;cursor:default;opacity:.85}
+.lc-mz{font-size:13px;font-weight:700;color:#1F3864}
+.lc-area{font-size:11px;color:#666}
+.lc-precio{font-size:15px;font-weight:700;color:#059669;margin-top:3px}
+.lc-m2{font-size:10px;color:#888}
+.est-tag{position:absolute;top:5px;right:5px;font-size:9px;padding:2px 6px;border-radius:7px;font-weight:700}
+.etv{background:#FEE2E2;color:#7F1D1D}
+.etr{background:#FEF3C7;color:#92400E}
+.etg{background:#D97706;color:#fff;font-size:8px}
+.attr-row{margin-top:3px;display:flex;flex-wrap:wrap;gap:2px}
+.at{font-size:8px;padding:1px 4px;border-radius:5px;font-weight:600}
+.atp{background:#DBEAFE;color:#1E3A8A}
+.atn{background:#FEE2E2;color:#7F1D1D}
+/* Modal */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:flex-end;justify-content:center}
+.mbg.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:18px 16px 40px;width:100%;max-width:480px;max-height:94vh;overflow-y:auto}
+.mh{width:36px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 14px}
+.mt{font-size:15px;font-weight:700;color:#1F3864;margin-bottom:2px}
+.ms2{font-size:11px;color:#888;margin-bottom:14px}
+.tipo-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.tb{padding:11px;border-radius:10px;border:2px solid #e2e8f0;background:#f8fafc;font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.tb.sv{border-color:#059669;background:#ECFDF5;color:#065F46}
+.tb.sr{border-color:#D97706;background:#FFFBEB;color:#92400E}
+/* Precio box */
+.pbox{background:#EFF6FF;border-radius:10px;padding:11px;margin-bottom:11px}
+.pl{font-size:11px;color:#0369a1;font-weight:600;margin-bottom:1px}
+.pv{font-size:22px;font-weight:700;color:#0369a1}
+.pm2{font-size:11px;color:#0284c7}
+/* Pago estructurado */
+.pago-box{background:#f0fdf4;border-radius:10px;padding:12px;margin-bottom:11px}
+.pago-title{font-size:11px;font-weight:700;color:#065F46;margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em}
+.pago-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pago-lbl{font-size:12px;color:#444;font-weight:600;min-width:90px}
+.pago-inp{flex:1;padding:8px 10px;font-size:14px;border:1.5px solid #86EFAC;border-radius:8px;background:#fff;text-align:right;font-weight:700;color:#065F46}
+.pago-inp:focus{border-color:#059669;outline:none}
+.pago-inp.readonly{background:#f0fdf4;border-color:#86EFAC;color:#065F46}
+.pago-result{background:#1F3864;border-radius:8px;padding:10px;margin-top:6px}
+.pr-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
+.pr-lbl{font-size:11px;color:#90CDF4}
+.pr-val{font-size:13px;font-weight:700;color:#fff}
+/* Campos cliente */
+.fld{margin-bottom:10px}
+.fld label{font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:3px}
+.fld input,.fld select,.fld textarea{width:100%;padding:10px 11px;font-size:14px;border:1.5px solid #d1d5db;border-radius:8px;background:#fff;color:#1a202c}
+.fld input:focus,.fld select:focus{border-color:#1F3864;outline:none}
+.cbtn{width:100%;padding:14px;border-radius:12px;border:none;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px}
+.cbv{background:#059669;color:#fff}
+.cbr{background:#D97706;color:#fff}
+.xbtn{width:100%;padding:11px;border-radius:12px;border:1.5px solid #e2e8f0;background:#fff;font-size:13px;color:#666;cursor:pointer;margin-top:8px}
+.wa-btn{background:#25D366;color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:8px}
+.divider{border:none;border-top:1px solid #e5e7eb;margin:12px 0}
+/* Login */
+.lbg{position:fixed;inset:0;background:#1F3864;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;padding:20px}
+.llogo{font-size:20px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px}
+.lsub{font-size:12px;color:#90CDF4;text-align:center;margin-bottom:24px}
+.lcard{background:#fff;border-radius:16px;padding:22px 18px;width:100%;max-width:340px}
+.lcard h2{font-size:15px;font-weight:700;color:#1F3864;margin-bottom:14px}
+.linp{width:100%;padding:11px 13px;font-size:14px;border:1.5px solid #d1d5db;border-radius:8px;margin-bottom:10px}
+.linp:focus{border-color:#1F3864;outline:none}
+.lerr{color:#DC2626;font-size:11px;margin-bottom:8px;display:none;font-weight:600}
+.lbtn{width:100%;padding:13px;background:#1F3864;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}
+/* Toast */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1F3864;color:#fff;padding:10px 20px;border-radius:20px;font-size:12px;font-weight:700;z-index:300;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1}
+.alert{padding:9px 11px;border-radius:8px;font-size:11px;margin-bottom:8px;border-left:4px solid;font-weight:500}
+.ao{background:#ECFDF5;color:#065F46;border-color:#10B981}
+.aw{background:#FFFBEB;color:#92400E;border-color:#F59E0B}
+.ai{background:#EFF6FF;color:#1E3A8A;border-color:#3B82F6}
+.pbar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-top:4px}
+.pfill{height:100%;border-radius:3px}
+.op-row{border-bottom:1px solid #f0f0f0;padding:9px 0}
+.op-row:last-child{border-bottom:none}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Editar nombre */
+.edit-nombre-wrap{display:flex;align-items:center;gap:6px;margin-top:8px}
+.edit-nombre-inp{flex:1;padding:6px 10px;font-size:13px;border:1.5px solid #90CDF4;border-radius:8px;background:rgba(255,255,255,.15);color:#fff}
+.edit-nombre-inp::placeholder{color:rgba(255,255,255,.5)}
+.edit-nombre-btn{padding:6px 12px;background:#059669;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="lbg" id="loginBg">
+  <div class="llogo">CONDOMINIO INSPIRA</div>
+  <div class="lsub">DE RÍO NEGRO · Panel de Ventas</div>
+  <div class="lcard">
+    <h2>Acceso de vendedor</h2>
+    <div style="font-size:11px;color:#888;margin-bottom:12px">Selecciona tu nombre e ingresa tu clave</div>
+    <select class="linp" id="l-user" style="margin-bottom:10px">
+      <option value="">— Selecciona tu nombre —</option>
+      <option value="Vendedor 1">Vendedor 1</option>
+      <option value="Vendedor 2">Vendedor 2</option>
+      <option value="Vendedor 3">Vendedor 3</option>
+      <option value="Vendedor 4">Vendedor 4</option>
+      <option value="Vendedor 5">Vendedor 5</option>
+      <option value="Vendedor 6">Vendedor 6</option>
+      <option value="Vendedor 7">Vendedor 7</option>
+    </select>
+    <input class="linp" type="password" id="l-pass" placeholder="Clave (ej: V001)"
+      onkeydown="if(event.key==='Enter') doLogin()"/>
+    <div class="lerr" id="l-err">Usuario o clave incorrectos</div>
+    <button class="lbtn" onclick="doLogin()">Ingresar</button>
+    <div style="font-size:10px;color:#aaa;text-align:center;margin-top:10px">Contacta al jefe de ventas si olvidaste tu clave</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="h-top">
+    <div style="flex:1">
+      <div class="h-title">INSPIRA · <span id="hv">—</span>
+        <span onclick="toggleEditNombre()" style="font-size:10px;opacity:.6;cursor:pointer;margin-left:6px">✏️</span>
+      </div>
+      <div class="h-sub">De Río Negro · Panel de Ventas</div>
+      <div class="edit-nombre-wrap" id="edit-nombre-wrap" style="display:none">
+        <input class="edit-nombre-inp" id="edit-nombre-inp" placeholder="Escribe tu nombre"/>
+        <button class="edit-nombre-btn" onclick="guardarNombre()">Guardar</button>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:9px;color:#90CDF4">precio actual</div>
+      <div style="font-size:16px;font-weight:700" id="hp">—</div>
+    </div>
+  </div>
+  <div class="tramo-badge" id="ht" style="background:#059669">Cargando...</div>
+</header>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nb active" onclick="showTab('lotes',this)"><span class="ni">🏠</span><span>Lotes</span></button>
+  <button class="nb" onclick="showTab('calc',this)"><span class="ni">🧮</span><span>Calcular</span></button>
+  <button class="nb" onclick="showTab('mis',this)"><span class="ni">📊</span><span>Mis ventas</span></button>
+  <button class="nb" onclick="showTab('info',this)"><span class="ni">ℹ️</span><span>Info</span></button>
+</div>
+
+<!-- MODAL REGISTRO -->
+<div class="mbg" id="modalBg">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mt" id="m-title">Registrar operación</div>
+    <div class="ms2" id="m-sub">—</div>
+
+    <!-- Tipo venta/reserva -->
+    <div class="tipo-g">
+      <div class="tb sv" id="btv" onclick="setTipo('venta')">✓ Venta</div>
+      <div class="tb" id="btr" onclick="setTipo('reserva')">◷ Reserva</div>
+    </div>
+
+    <!-- Precio del lote -->
+    <div class="pbox">
+      <div class="pl">Precio acordado del lote</div>
+      <div class="pv" id="mpd">—</div>
+      <div class="pm2" id="mm2d">—</div>
+    </div>
+    <div class="fld">
+      <label>Ajustar precio si se negoció otro (S/)</label>
+      <input type="number" id="mprecio" step="100" oninput="updPago()"/>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- Estructura de pago -->
+    <div class="pago-box" id="pago-section">
+      <div class="pago-title">Estructura de pago</div>
+
+      <div class="pago-row">
+        <span class="pago-lbl">Separación (S/)</span>
+        <input class="pago-inp" type="number" id="p-sep" value="500" step="100" oninput="updPago()" placeholder="Ej: 500"/>
+      </div>
+      <div style="font-size:10px;color:#059669;margin:-4px 0 8px 98px">Aparta el lote · forma parte de la inicial</div>
+
+      <div class="pago-row">
+        <span class="pago-lbl">Inicial total (S/)</span>
+        <input class="pago-inp" type="number" id="p-ini" value="0" step="500" oninput="updPago()" placeholder="Ej: 3000"/>
+      </div>
+      <div style="font-size:10px;color:#059669;margin:-4px 0 8px 98px">Incluye la separación · acordado con el cliente</div>
+
+      <div class="pago-row">
+        <span class="pago-lbl">Plazo cuotas</span>
+        <select class="pago-inp" id="p-meses" onchange="updPago()" style="text-align:left">
+          <option value="12">12 meses</option>
+          <option value="18">18 meses</option>
+          <option value="24" selected>24 meses</option>
+          <option value="custom">Personalizado</option>
+        </select>
+      </div>
+      <div class="pago-row" id="p-custom-row" style="display:none">
+        <span class="pago-lbl">Nº de meses</span>
+        <input class="pago-inp" type="number" id="p-custom-meses" min="1" max="36" value="24" oninput="updPago()"/>
+      </div>
+
+      <div class="pago-result" id="pago-result">
+        <div class="pr-row"><span class="pr-lbl">Precio lote</span><span class="pr-val" id="pr-precio">—</span></div>
+        <div class="pr-row"><span class="pr-lbl">− Inicial (incluye separación)</span><span class="pr-val" id="pr-ini">—</span></div>
+        <div class="pr-row" style="border-top:1px solid rgba(255,255,255,.2);margin-top:4px;padding-top:4px">
+          <span class="pr-lbl" style="color:#6EE7B7;font-weight:700">Saldo a financiar</span>
+          <span class="pr-val" id="pr-saldo" style="color:#6EE7B7">—</span>
+        </div>
+        <div class="pr-row"><span class="pr-lbl">Cuota mensual (s/i)</span><span class="pr-val" id="pr-cuota" style="color:#FCD34D;font-size:16px">—</span></div>
+      </div>
+
+      <div style="margin-top:8px">
+        <div style="font-size:11px;color:#065F46;font-weight:700;margin-bottom:4px">Tu comisión (10%)</div>
+        <div style="font-size:18px;font-weight:700;color:#059669" id="m-com">—</div>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- Datos del cliente -->
+    <div class="fld"><label>Tu nombre (vendedor)</label><input id="mvend" readonly style="background:#f8fafc"/></div>
+    <div class="fld"><label>Nombre del cliente *</label><input id="mcliente" placeholder="Ej: Juan Pérez García"/></div>
+    <div class="fld"><label>Teléfono del cliente *</label><input type="tel" id="mtel" placeholder="Ej: 987654321"/></div>
+    <div class="fld"><label>DNI del cliente</label><input id="mdni" placeholder="Ej: 45678901" maxlength="8"/></div>
+
+    <button class="cbtn cbv" id="bcfm" onclick="confirmarOp()">✓ Confirmar venta</button>
+    <button class="xbtn" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<div class="con">
+  <div id="tab-lotes"></div>
+  <div id="tab-calc" style="display:none"></div>
+  <div id="tab-mis" style="display:none"></div>
+  <div id="tab-info" style="display:none"></div>
+</div>
+
+<script>
+// ── CLAVES DE ACCESO ──────────────────────────────────────────────────────────
+// Para cambiar: modifica el nombre o la clave de cada vendedor
+const VENDEDORES_CRED = {
+  'Vendedor 1': 'V001',
+  'Vendedor 2': 'V002',
+  'Vendedor 3': 'V003',
+  'Vendedor 4': 'V004',
+  'Vendedor 5': 'V005',
+  'Vendedor 6': 'V006',
+  'Vendedor 7': 'V007',
+};
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const API = 'https://script.google.com/macros/s/AKfycbwo1g-dH9DyCjzAKA7KpVCNY1tpSxhqApOCWkAflyep83fZbyhNhVIXfz6r1D05fPyR/exec';
+
+const TRAMOS_BASE = [
+  {label:'T1',precio:120,meta:4182,periodo:'Mar–Jul 2026'},
+  {label:'T2',precio:143,meta:3997,periodo:'Ago–Dic 2026'},
+  {label:'T3',precio:167,meta:4124,periodo:'Ene–May 2027'},
+  {label:'T4',precio:190,meta:4139,periodo:'Jun–Oct 2027'},
+  {label:'T5',precio:214,meta:3504,periodo:'Nov 2027–Feb 2028'},
+];
+const TC = ['#7C3AED','#2563EB','#059669','#D97706','#DC2626'];
+
+const ATTRS = {
+  esquina: {lbl:'Esquina',pct:15,tipo:'pos'},
+  ingreso: {lbl:'Cerca ingreso',pct:10,tipo:'pos'},
+  rio:     {lbl:'Vista río',pct:12,tipo:'pos'},
+  amenidad:{lbl:'Amenidades',pct:8,tipo:'pos'},
+  fondo:   {lbl:'Fondo manzana',pct:-8,tipo:'neg'},
+  lejos:   {lbl:'Lejos ingreso',pct:-7,tipo:'neg'},
+};
+
+const LOTES_FIJOS = [
+  {mz:'C',lt:2,area:200,est:'vendido'},
+  {mz:'C',lt:3,area:200,est:'vendido'},
+  {mz:'H',lt:7,area:180,est:'vendido'},
+  {mz:'H',lt:8,area:180,est:'vendido'},
+  {mz:'H',lt:1,area:206,est:'reservado'},
+  {mz:'H',lt:2,area:180,est:'reservado'},
+  {mz:'H',lt:3,area:180,est:'reservado'},
+  {mz:'H',lt:4,area:180,est:'reservado'},
+  {mz:'I',lt:3,area:229,est:'reservado'},
+  {mz:'J',lt:2,area:150,est:'reservado'},
+  {mz:'C',lt:4,area:200,est:'reservado'},
+];
+
+const POOL = [
+  {mz:'A',lt:1,area:272,attrs:['ingreso']},{mz:'A',lt:2,area:188,attrs:['fondo']},
+  {mz:'A',lt:3,area:222,attrs:[]},{mz:'A',lt:4,area:249,attrs:[]},
+  {mz:'A',lt:5,area:298,attrs:['esquina','rio']},
+  {mz:'B',lt:1,area:179,attrs:['esquina']},{mz:'B',lt:2,area:200,attrs:[]},
+  {mz:'B',lt:3,area:200,attrs:[]},{mz:'B',lt:4,area:200,attrs:[]},
+  {mz:'B',lt:5,area:200,attrs:[]},{mz:'B',lt:6,area:200,attrs:['fondo']},
+  {mz:'B',lt:7,area:200,attrs:['fondo']},{mz:'B',lt:8,area:200,attrs:[]},
+  {mz:'B',lt:9,area:200,attrs:[]},{mz:'B',lt:10,area:200,attrs:[]},
+  {mz:'B',lt:11,area:200,attrs:[]},{mz:'B',lt:12,area:200,attrs:[]},
+  {mz:'B',lt:13,area:172,attrs:['esquina']},
+  {mz:'C',lt:1,area:202,attrs:['esquina']},{mz:'C',lt:5,area:200,attrs:[]},
+  {mz:'C',lt:6,area:200,attrs:['fondo']},{mz:'C',lt:7,area:200,attrs:['fondo']},
+  {mz:'C',lt:8,area:200,attrs:[]},{mz:'C',lt:9,area:200,attrs:[]},
+  {mz:'C',lt:10,area:200,attrs:[]},{mz:'C',lt:11,area:200,attrs:[]},
+  {mz:'C',lt:12,area:200,attrs:[]},{mz:'C',lt:13,area:200,attrs:[]},
+  {mz:'C',lt:14,area:200,attrs:[]},{mz:'C',lt:15,area:200,attrs:[]},
+  {mz:'C',lt:16,area:200,attrs:[]},{mz:'C',lt:17,area:169,attrs:['esquina']},
+  {mz:'E',lt:1,area:228,attrs:['esquina','amenidad']},{mz:'E',lt:2,area:200,attrs:['amenidad']},
+  {mz:'E',lt:3,area:200,attrs:[]},{mz:'E',lt:4,area:200,attrs:[]},
+  {mz:'E',lt:5,area:200,attrs:[]},{mz:'E',lt:6,area:200,attrs:[]},
+  {mz:'E',lt:7,area:200,attrs:[]},{mz:'E',lt:8,area:200,attrs:[]},
+  {mz:'E',lt:9,area:200,attrs:[]},{mz:'E',lt:10,area:200,attrs:[]},
+  {mz:'E',lt:11,area:200,attrs:[]},{mz:'E',lt:12,area:200,attrs:[]},
+  {mz:'E',lt:13,area:211,attrs:[]},{mz:'E',lt:14,area:223,attrs:[]},
+  {mz:'E',lt:15,area:198,attrs:[]},{mz:'E',lt:16,area:200,attrs:[]},
+  {mz:'E',lt:17,area:200,attrs:[]},{mz:'E',lt:18,area:200,attrs:[]},
+  {mz:'E',lt:19,area:200,attrs:[]},{mz:'E',lt:20,area:200,attrs:[]},
+  {mz:'E',lt:21,area:200,attrs:[]},{mz:'E',lt:22,area:200,attrs:[]},
+  {mz:'E',lt:23,area:200,attrs:[]},{mz:'E',lt:24,area:200,attrs:[]},
+  {mz:'E',lt:25,area:200,attrs:[]},{mz:'E',lt:26,area:284,attrs:['esquina']},
+  {mz:'F',lt:1,area:208,attrs:['esquina','amenidad']},{mz:'F',lt:2,area:200,attrs:['amenidad']},
+  {mz:'F',lt:3,area:200,attrs:[]},{mz:'F',lt:4,area:200,attrs:[]},
+  {mz:'F',lt:5,area:222,attrs:['esquina']},{mz:'F',lt:6,area:256,attrs:[]},
+  {mz:'F',lt:7,area:192,attrs:['fondo']},{mz:'F',lt:8,area:179,attrs:['fondo','lejos']},
+  {mz:'F',lt:9,area:198,attrs:['esquina']},
+  {mz:'G',lt:1,area:188,attrs:['esquina']},{mz:'G',lt:2,area:200,attrs:[]},
+  {mz:'G',lt:3,area:200,attrs:[]},{mz:'G',lt:4,area:200,attrs:[]},
+  {mz:'G',lt:5,area:200,attrs:[]},{mz:'G',lt:6,area:200,attrs:['fondo']},
+  {mz:'G',lt:7,area:191,attrs:['fondo']},{mz:'G',lt:8,area:313,attrs:['esquina','rio']},
+  {mz:'G',lt:9,area:200,attrs:[]},{mz:'G',lt:10,area:200,attrs:[]},
+  {mz:'G',lt:11,area:200,attrs:[]},{mz:'G',lt:12,area:200,attrs:[]},
+  {mz:'G',lt:13,area:200,attrs:[]},{mz:'G',lt:14,area:244,attrs:['esquina','ingreso']},
+  {mz:'H',lt:5,area:180,attrs:[]},{mz:'H',lt:6,area:180,attrs:[]},
+  {mz:'H',lt:9,area:288,attrs:['esquina']},
+  {mz:'I',lt:1,area:210,attrs:['esquina']},{mz:'I',lt:2,area:211,attrs:[]},
+  {mz:'J',lt:1,area:150,attrs:['esquina']},{mz:'J',lt:3,area:150,attrs:[]},
+  {mz:'J',lt:4,area:151,attrs:['esquina']},
+  {mz:'K',lt:1,area:150,attrs:['esquina']},{mz:'K',lt:2,area:150,attrs:['lejos']},
+  {mz:'K',lt:3,area:150,attrs:['lejos']},{mz:'K',lt:4,area:90,attrs:['lejos','fondo']},
+  {mz:'K',lt:5,area:150,attrs:['lejos']},{mz:'K',lt:6,area:150,attrs:['lejos']},
+  {mz:'K',lt:7,area:150,attrs:['lejos']},{mz:'K',lt:8,area:150,attrs:['esquina']},
+  {mz:'L',lt:1,area:150,attrs:['lejos']},{mz:'L',lt:2,area:150,attrs:['lejos']},
+  {mz:'L',lt:3,area:150,attrs:['lejos']},{mz:'L',lt:4,area:150,attrs:['lejos','esquina']},
+];
+
+// ── ESTADO ────────────────────────────────────────────────────────────────────
+let vendedor = '';
+let usuarioClave = ''; // clave usada en login (para identificar al vendedor)
+let tipoOp = 'venta';
+let modalLote = null;
+let tramosData = TRAMOS_BASE.map(t=>({...t,m2Acum:0}));
+let opsSheet = [];
+let tabActivo = 'lotes';
+let filtMz = 'todos';
+let filtEst = 'disponible';
+let calcAttrs = new Set();
+
+const fmt = n => 'S/ ' + Math.round(n).toLocaleString('es-PE');
+const fM2 = n => 'S/ ' + (Math.round(n*10)/10).toFixed(1);
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+function doLogin(){
+  const userInput = document.getElementById('l-user').value.trim();
+  const passInput = document.getElementById('l-pass').value.trim();
+  const err = document.getElementById('l-err');
+
+  // Buscar vendedor que coincida (user insensible a mayúsculas)
+  const match = Object.entries(VENDEDORES_CRED).find(([nombre, clave]) =>
+    nombre.toLowerCase() === userInput.toLowerCase() && clave.toLowerCase() === passInput.toLowerCase()
+  );
+
+  if (!match) {
+    err.style.display = 'block';
+    document.getElementById('l-pass').value = '';
+    document.getElementById('l-pass').style.borderColor = '#DC2626';
+    setTimeout(()=>{ document.getElementById('l-pass').style.borderColor='#d1d5db'; },2000);
+    return;
+  }
+
+  vendedor = match[0];
+  // Cargar nombre personalizado si lo guardó antes
+  const nombreGuardado = localStorage.getItem('inspira_nombre_' + vendedor);
+  if (nombreGuardado) vendedor = nombreGuardado;
+
+  document.getElementById('loginBg').style.display = 'none';
+  document.getElementById('hv').textContent = vendedor;
+  document.getElementById('edit-nombre-inp').value = vendedor;
+  showToast('Bienvenido/a ' + vendedor.split(' ')[0]);
+  syncFromSheet();
+  setInterval(syncFromSheet, 30000);
+}
+
+// ── EDITAR NOMBRE ─────────────────────────────────────────────────────────────
+function toggleEditNombre(){
+  const wrap = document.getElementById('edit-nombre-wrap');
+  wrap.style.display = wrap.style.display==='none' ? 'flex' : 'none';
+  if(wrap.style.display==='flex') document.getElementById('edit-nombre-inp').focus();
+}
+
+function guardarNombre(){
+  const nuevo = document.getElementById('edit-nombre-inp').value.trim();
+  if(!nuevo){ alert('Escribe un nombre válido'); return; }
+  // Guardar en localStorage ligado al usuario original
+  const claveOriginal = Object.entries(VENDEDORES_CRED).find(([n]) =>
+    n.toLowerCase() === document.getElementById('l-user').value.toLowerCase()
+  );
+  if(claveOriginal) localStorage.setItem('inspira_nombre_' + claveOriginal[0], nuevo);
+  vendedor = nuevo;
+  document.getElementById('hv').textContent = nuevo;
+  document.getElementById('edit-nombre-wrap').style.display='none';
+  showToast('Nombre actualizado: ' + nuevo);
+}
+
+// ── SYNC ──────────────────────────────────────────────────────────────────────
+async function syncFromSheet(){
+  try{
+    const [rOps,rTr] = await Promise.all([
+      fetch(API+'?action=getOps').then(r=>r.json()),
+      fetch(API+'?action=getTramos').then(r=>r.json())
+    ]);
+    if(rOps.ok) opsSheet = rOps.data||[];
+    if(rTr.ok && rTr.data) rTr.data.forEach(row=>{
+      const t=tramosData.find(t=>t.label===row.tramo);
+      if(t){t.m2Acum=+row.m2||0; t.precio=+row.precio||t.precio;}
+    });
+    POOL.forEach(l=>{if(l.est!=='vendido'&&l.est!=='reservado') l.est='disponible';});
+    opsSheet.forEach(op=>{
+      const l=POOL.find(x=>x.mz===op.manzana&&x.lt==op.lote);
+      if(l){l.est=op.tipo==='venta'?'vendido':'reservado'; l.precioVenta=+op.precio;}
+    });
+    renderAll();
+  }catch(e){
+    renderAll();
+  }
+}
+
+async function postToSheet(data){
+  return fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'registrarOp',...data})}).then(r=>r.json());
+}
+
+// ── TRAMO Y PRECIO ────────────────────────────────────────────────────────────
+function tramoActivo(){
+  for(let i=0;i<5;i++) if(tramosData[i].m2Acum<tramosData[i].meta) return i;
+  return 4;
+}
+function precioLote(l){
+  const ta=tramoActivo();
+  let ap=0; (l.attrs||[]).forEach(a=>{if(ATTRS[a])ap+=ATTRS[a].pct;});
+  return Math.round(l.area*tramosData[ta].precio*(1+ap/100));
+}
+
+// ── HEADER ────────────────────────────────────────────────────────────────────
+function updateHeader(){
+  const ta=tramoActivo(), t=tramosData[ta];
+  document.getElementById('hp').textContent=`S/${t.precio}/m²`;
+  document.getElementById('ht').textContent=`${t.label} — ${t.periodo} · ${t.m2Acum.toLocaleString()}/${t.meta.toLocaleString()} m²`;
+  document.getElementById('ht').style.background=TC[ta];
+}
+
+// ── TAB LOTES ─────────────────────────────────────────────────────────────────
+function renderLotes(){
+  const ta=tramoActivo();
+  const mzs=[...new Set([...LOTES_FIJOS,...POOL].map(l=>l.mz))].sort();
+  const todos=[...LOTES_FIJOS,...POOL];
+  const filtered=todos.filter(l=>(filtMz==='todos'||l.mz===filtMz)&&(filtEst==='todos'||l.est===filtEst));
+  const disp=POOL.filter(l=>l.est==='disponible').length;
+  const vend=todos.filter(l=>l.est==='vendido').length;
+  const res=todos.filter(l=>l.est==='reservado').length;
+  const grandes=POOL.filter(l=>l.est==='disponible'&&l.area>250);
+
+  // Botones manzana en 2 filas: A-G primera, H-L segunda
+  const mzFila1=mzs.filter(m=>m<='G');
+  const mzFila2=mzs.filter(m=>m>'G');
+
+  const cards=filtered.map(l=>{
+    const esFijo=LOTES_FIJOS.includes(l);
+    const precio=esFijo?(l.precioVenta||0):precioLote(l);
+    const m2p=Math.round(precio/l.area*10)/10;
+    const esGrande=!esFijo&&l.area>250;
+    const attrTags=(l.attrs||[]).map(a=>{
+      const at=ATTRS[a];
+      return at?`<span class="at ${at.tipo==='pos'?'atp':'atn'}">${at.tipo==='pos'?'+':''}${at.pct}% ${at.lbl}</span>`:'';
+    }).join('');
+    const estTag=l.est==='vendido'?`<span class="est-tag etv">Vendido</span>`:
+                 l.est==='reservado'?`<span class="est-tag etr">Reservado</span>`:'';
+    const grandeTag=esGrande&&l.est==='disponible'?`<span class="est-tag etg">⭐ Grande</span>`:'';
+    const clickable=l.est==='disponible'&&!esFijo;
+    return`<div class="lc ${l.est} ${esGrande?'grande':''}"
+      ${clickable?`onclick="abrirModal('${l.mz}',${l.lt},${precio})"`:''}>
+      ${estTag}${grandeTag}
+      <div class="lc-mz">Mz ${l.mz}-${l.lt}</div>
+      <div class="lc-area">${l.area} m²</div>
+      <div class="lc-precio">${fmt(precio)}</div>
+      <div class="lc-m2">${fM2(m2p)}/m²</div>
+      ${attrTags?`<div class="attr-row">${attrTags}</div>`:''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('tab-lotes').innerHTML=`
+    ${grandes.length>0?`<div class="alert aw">⭐ ${grandes.length} lotes grandes disponibles — véndelos pronto</div>`:''}
+    <div class="card" style="padding:10px">
+      <div class="g3" style="margin-bottom:10px">
+        <div class="met"><div class="ml">Disponibles</div><div class="mv" style="color:#059669">${disp}</div></div>
+        <div class="met"><div class="ml">Reservados</div><div class="mv" style="color:#D97706">${res}</div></div>
+        <div class="met"><div class="ml">Vendidos</div><div class="mv" style="color:#DC2626">${vend}</div></div>
+      </div>
+      <div class="flt-wrap">
+        <div class="flt">
+          <button class="fb ${filtEst==='disponible'?'on':''}" onclick="filtEst='disponible';renderLotes()">Disponibles</button>
+          <button class="fb ${filtEst==='todos'?'on':''}" onclick="filtEst='todos';renderLotes()">Todos</button>
+          <button class="fb ${filtEst==='reservado'?'on':''}" onclick="filtEst='reservado';renderLotes()">Reservados</button>
+          <button class="fb ${filtEst==='vendido'?'on':''}" onclick="filtEst='vendido';renderLotes()">Vendidos</button>
+        </div>
+        <div class="flt">
+          <button class="fb ${filtMz==='todos'?'on':''}" onclick="filtMz='todos';renderLotes()">Todas</button>
+          ${mzFila1.map(m=>`<button class="fb ${filtMz===m?'on':''}" onclick="filtMz='${m}';renderLotes()">Mz ${m}</button>`).join('')}
+        </div>
+        ${mzFila2.length>0?`<div class="flt">${mzFila2.map(m=>`<button class="fb ${filtMz===m?'on':''}" onclick="filtMz='${m}';renderLotes()">Mz ${m}</button>`).join('')}</div>`:''}
+      </div>
+    </div>
+    <div class="lg">${cards||`<div style="grid-column:span 2;text-align:center;color:#888;padding:20px;font-size:13px">Sin lotes con este filtro</div>`}</div>
+    <div style="font-size:11px;color:#aaa;text-align:center;margin-top:8px">Toca un lote verde para registrar · auto-sync 30s</div>
+  `;
+}
+
+// ── TAB CALCULADORA ───────────────────────────────────────────────────────────
+function renderCalc(){
+  const ta=tramoActivo();
+  document.getElementById('tab-calc').innerHTML=`
+    <div class="card">
+      <div class="st">Calculadora de precio y cuotas</div>
+      <div class="fld"><label>Área del lote (m²)</label>
+        <input type="number" id="carea" value="200" step="1" oninput="calcPrecio()"/></div>
+      <div class="fld"><label>Atributos de ubicación</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px" id="calc-attrs">
+          ${Object.entries(ATTRS).map(([id,a])=>`
+            <div onclick="togCalc('${id}',this)" id="ca-${id}"
+              style="padding:7px 11px;border-radius:8px;border:2px solid ${a.tipo==='pos'?'#93C5FD':'#FCA5A5'};
+                     background:${a.tipo==='pos'?'#EFF6FF':'#FEF2F2'};cursor:pointer;font-size:12px;font-weight:600;
+                     color:${a.tipo==='pos'?'#1E3A8A':'#7F1D1D'}">
+              ${a.tipo==='pos'?'+':''}${a.pct}% ${a.lbl}
+            </div>`).join('')}
+        </div>
+      </div>
+      <div id="cresult"></div>
+    </div>
+    <div class="card">
+      <div class="st">Precios vigentes</div>
+      ${tramosData.map((t,i)=>{
+        const esA=i===ta;
+        const pct=Math.min(100,Math.round(t.m2Acum/t.meta*100));
+        return`<div style="padding:8px 0;border-bottom:1px solid #f0f0f0">
+          <div style="display:flex;justify-content:space-between">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:${TC[i]}">${t.label} — S/${t.precio}/m²</span>
+              ${esA?`<span style="font-size:9px;background:${TC[i]};color:#fff;padding:1px 6px;border-radius:8px;margin-left:5px">ACTIVO</span>`:''}
+            </div>
+            <div style="text-align:right"><div style="font-size:12px;font-weight:700">${fmt(t.precio*200)}</div><div style="font-size:9px;color:#888">lote 200m²</div></div>
+          </div>
+          <div style="height:4px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-top:5px">
+            <div style="width:${pct}%;height:100%;background:${TC[i]};border-radius:3px"></div>
+          </div>
+          <div style="font-size:9px;color:#888;margin-top:2px">${t.m2Acum}/${t.meta} m² · ${t.periodo}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  calcPrecio();
+}
+
+function togCalc(id,el){
+  if(calcAttrs.has(id)){calcAttrs.delete(id);el.style.opacity='0.5';el.style.fontWeight='400';}
+  else{calcAttrs.add(id);el.style.opacity='1';el.style.fontWeight='700';}
+  calcPrecio();
+}
+
+function calcPrecio(){
+  const ta=tramoActivo();
+  const area=+document.getElementById('carea')?.value||200;
+  let ap=0; calcAttrs.forEach(id=>{if(ATTRS[id])ap+=ATTRS[id].pct;});
+  const precio=Math.round(area*tramosData[ta].precio*(1+ap/100));
+  const com=Math.round(precio*0.10);
+  const el=document.getElementById('cresult');
+  if(!el) return;
+
+  const sepDef=500;
+  const iniDef=Math.round(precio*0.15);
+  const saldo=precio-iniDef;
+
+  el.innerHTML=`
+    <div class="pbox" style="margin-top:10px">
+      <div class="pl">Precio total del lote</div>
+      <div class="pv">${fmt(precio)}</div>
+      <div class="pm2">Tu comisión: ${fmt(com)}</div>
+    </div>
+    <div class="pago-box" style="margin-top:8px">
+      <div class="pago-title">Simular plan de pago</div>
+      <div class="pago-row">
+        <span class="pago-lbl">Separación</span>
+        <input class="pago-inp" type="number" id="csep" value="${sepDef}" step="100" oninput="calcCuotas(${precio})"/>
+      </div>
+      <div class="pago-row">
+        <span class="pago-lbl">Inicial total</span>
+        <input class="pago-inp" type="number" id="cini" value="${iniDef}" step="500" oninput="calcCuotas(${precio})"/>
+      </div>
+      <div class="pago-row">
+        <span class="pago-lbl">Meses</span>
+        <input class="pago-inp" type="number" id="cmeses" value="24" min="1" max="36" oninput="calcCuotas(${precio})"/>
+      </div>
+      <div class="pago-result" id="ccuotas-result"></div>
+    </div>
+    <button class="wa-btn" id="wa-calc-btn" onclick="waCalc(${precio},${area})">
+      <span style="font-size:18px">💬</span> Compartir por WhatsApp
+    </button>
+  `;
+  calcCuotas(precio);
+}
+
+function calcCuotas(precio){
+  const ini=+document.getElementById('cini')?.value||0;
+  const sep=+document.getElementById('csep')?.value||0;
+  const meses=+document.getElementById('cmeses')?.value||24;
+  const saldo=Math.max(0,precio-ini);
+  const cuota=meses>0?Math.round(saldo/meses):0;
+  const el=document.getElementById('ccuotas-result');
+  if(!el) return;
+  el.innerHTML=`
+    <div class="pr-row"><span class="pr-lbl">Precio lote</span><span class="pr-val">${fmt(precio)}</span></div>
+    <div class="pr-row"><span class="pr-lbl">Separación</span><span class="pr-val">${fmt(sep)}</span></div>
+    <div class="pr-row"><span class="pr-lbl">Inicial total</span><span class="pr-val">${fmt(ini)}</span></div>
+    <div class="pr-row" style="border-top:1px solid rgba(255,255,255,.2);margin-top:4px;padding-top:4px">
+      <span class="pr-lbl" style="color:#6EE7B7;font-weight:700">Saldo a cuotas</span>
+      <span class="pr-val" style="color:#6EE7B7">${fmt(saldo)}</span>
+    </div>
+    <div class="pr-row">
+      <span class="pr-lbl">Cuota mensual (${meses} m.)</span>
+      <span class="pr-val" style="color:#FCD34D;font-size:16px">${fmt(cuota)}/mes</span>
+    </div>
+  `;
+}
+
+function waCalc(precio,area){
+  const ta=tramoActivo();
+  const ini=+document.getElementById('cini')?.value||Math.round(precio*0.15);
+  const meses=+document.getElementById('cmeses')?.value||24;
+  const sep=+document.getElementById('csep')?.value||500;
+  const saldo=precio-ini;
+  const cuota=Math.round(saldo/meses);
+  const msg=`🏡 *CONDOMINIO INSPIRA DE RÍO NEGRO*\n\n`+
+    `✅ Piscinas · Maloca · Cancha · Mirador · Yoga · Bosque\n\n`+
+    `*LOTE DISPONIBLE*\n• Área: ${area} m²\n• Precio: ${fmt(precio)}\n`+
+    `• Precio/m²: S/${tramosData[ta].precio} (${tramosData[ta].label})\n\n`+
+    `*PLAN DE PAGO*\n`+
+    `• Separación: ${fmt(sep)}\n`+
+    `• Inicial total: ${fmt(ini)}\n`+
+    `• Saldo: ${fmt(saldo)} en ${meses} cuotas de ${fmt(cuota)}/mes\n\n`+
+    `📲 Asesor: ${vendedor}`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ── TAB MIS VENTAS ────────────────────────────────────────────────────────────
+function renderMis(){
+  const mis=[...opsSheet].filter(o=>o.vendedor===vendedor).reverse();
+  const ventas=mis.filter(o=>o.tipo==='venta');
+  const reservas=mis.filter(o=>o.tipo==='reserva');
+  const totalCom=ventas.reduce((s,o)=>s+Math.round((+o.precio||0)*0.10),0);
+
+  const rows=mis.length===0
+    ?`<div style="text-align:center;color:#888;padding:20px;font-size:13px">Aún no tienes operaciones</div>`
+    :mis.map(o=>`<div class="op-row">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:13px;font-weight:700">Mz ${o.manzana}-${o.lote} · ${o.area}m²</div>
+          <div style="font-size:11px;color:#666">${o.cliente} · ${o.fecha}</div>
+          ${o.separacion?`<div style="font-size:10px;color:#0369a1;margin-top:2px">Sep: ${fmt(+o.separacion)} · Ini: ${fmt(+o.inicial)} · ${o.meses||24} cuotas de ${fmt(Math.round((+o.precio-(+o.inicial||0))/(+o.meses||24)))}/mes</div>`:''}
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;font-weight:700;color:${o.tipo==='venta'?'#065F46':'#92400E'}">${fmt(+o.precio||0)}</div>
+          <span style="font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700;
+            background:${o.tipo==='venta'?'#D1FAE5':'#FEF3C7'};
+            color:${o.tipo==='venta'?'#065F46':'#92400E'}">${o.tipo}</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;align-items:center">
+        <span style="font-size:11px;color:#059669;font-weight:700">Comisión: ${fmt(Math.round((+o.precio||0)*0.10))}</span>
+        <button onclick="waFicha('${o.manzana}',${o.lote},${o.area},${o.precio},${o.separacion||500},${o.inicial||0},${o.meses||24})"
+          style="font-size:10px;background:#25D366;color:#fff;border:none;border-radius:6px;padding:3px 9px;cursor:pointer">
+          💬 Ficha
+        </button>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('tab-mis').innerHTML=`
+    <div class="g3" style="margin-bottom:10px">
+      <div class="met"><div class="ml">Mis ventas</div><div class="mv" style="color:#065F46">${ventas.length}</div></div>
+      <div class="met"><div class="ml">Reservas</div><div class="mv" style="color:#D97706">${reservas.length}</div></div>
+      <div class="met"><div class="ml">Comisión</div><div class="mv" style="font-size:14px;color:#059669">${fmt(totalCom)}</div></div>
+    </div>
+    <div class="card"><div class="st">Historial</div>${rows}</div>
+  `;
+}
+
+function waFicha(mz,lt,area,precio,sep,ini,meses){
+  const saldo=precio-ini;
+  const cuota=Math.round(saldo/meses);
+  const msg=`🏡 *FICHA DE LOTE — INSPIRA*\n\n`+
+    `📍 Manzana ${mz} · Lote ${lt} · ${area} m²\n`+
+    `💰 Precio: ${fmt(+precio)}\n\n`+
+    `*PLAN DE PAGO*\n`+
+    `• Separación: ${fmt(+sep)}\n`+
+    `• Inicial: ${fmt(+ini)}\n`+
+    `• Saldo: ${fmt(saldo)} en ${meses} cuotas de ${fmt(cuota)}/mes\n\n`+
+    `🌿 Piscinas · Maloca · Cancha · Mirador · Yoga · Bosque\n`+
+    `📲 ${vendedor}`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ── TAB INFO ──────────────────────────────────────────────────────────────────
+function renderInfo(){
+  const ta=tramoActivo();
+  document.getElementById('tab-info').innerHTML=`
+    <div class="card">
+      <div class="st">Argumento — ${tramosData[ta].label} activo</div>
+      <div style="background:#EFF6FF;border-radius:8px;padding:12px;font-size:13px;line-height:1.7;color:#0369a1;border-left:4px solid ${TC[ta]}">
+        ${['Estás comprando al precio más bajo del proyecto. Esta es la mejor inversión antes que suba.',
+           'La obra avanza. Los primeros compradores ya ganaron plusvalía. Entra antes que suba más.',
+           'A mitad del proyecto. Las amenidades ya son visibles. Tu lote vale más cada mes.',
+           'Proyecto casi terminado. Infraestructura lista. Oportunidad final antes del precio de entrega.',
+           'Últimos lotes disponibles. Precio de entrega. El proyecto está terminado.'][ta]}
+      </div>
+    </div>
+    <div class="card">
+      <div class="st">Amenidades incluidas</div>
+      ${['💧 Piscinas','🏠 Maloca','⚽ Campo deportivo','🔭 Mirador','🧘 Zona de yoga','🌳 Zona de bosque','🍖 Zona de parrilla','🎮 Zona de juegos para niños','⚡ Luz eléctrica','🚰 Agua potable','📄 Documentos al día'].map(a=>`
+        <div style="padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:13px">${a}</div>`).join('')}
+    </div>
+    <div style="text-align:center;padding:16px;font-size:11px;color:#aaa">
+      ${vendedor} · <span onclick="logout()" style="color:#1F3864;cursor:pointer;text-decoration:underline">Cerrar sesión</span>
+    </div>
+  `;
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function abrirModal(mz,lt,precio){
+  const l=POOL.find(x=>x.mz===mz&&x.lt==lt);
+  if(!l||l.est!=='disponible') return;
+  modalLote={mz,lt:+lt,area:l.area,precio};
+  tipoOp='venta'; setTipo('venta');
+  document.getElementById('m-title').textContent=`Mz ${mz} · Lote ${lt}`;
+  document.getElementById('m-sub').textContent=`${l.area} m²${l.area>250?' ⭐ Lote grande — véndelo ahora':''}`;
+  document.getElementById('mprecio').value=precio;
+  document.getElementById('mvend').value=vendedor;
+  document.getElementById('mcliente').value='';
+  document.getElementById('mtel').value='';
+  document.getElementById('mdni').value='';
+  document.getElementById('p-sep').value=500;
+  document.getElementById('p-ini').value=Math.round(precio*0.15);
+  document.getElementById('p-meses').value='24';
+  document.getElementById('p-custom-row').style.display='none';
+  updPago();
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function setTipo(t){
+  tipoOp=t; const v=t==='venta';
+  document.getElementById('btv').className='tb '+(v?'sv':'');
+  document.getElementById('btr').className='tb '+(v?'':'sr');
+  document.getElementById('bcfm').className='cbtn '+(v?'cbv':'cbr');
+  document.getElementById('bcfm').textContent=v?'✓ Confirmar venta':'◷ Confirmar reserva';
+  // Ocultar pago detallado en reserva
+  document.getElementById('pago-section').style.display=v?'block':'none';
+}
+
+function updPago(){
+  const precio=+document.getElementById('mprecio')?.value||0;
+  const ini=+document.getElementById('p-ini')?.value||0;
+  const mesesSel=document.getElementById('p-meses')?.value;
+
+  // Mostrar campo personalizado si eligió "custom"
+  const customRow=document.getElementById('p-custom-row');
+  if(customRow) customRow.style.display=mesesSel==='custom'?'flex':'none';
+  const meses=mesesSel==='custom'?(+document.getElementById('p-custom-meses')?.value||24):(+mesesSel||24);
+
+  const saldo=Math.max(0,precio-ini);
+  const cuota=meses>0?Math.round(saldo/meses):0;
+  const com=Math.round(precio*0.10);
+
+  if(modalLote){
+    document.getElementById('mpd').textContent=fmt(precio);
+    document.getElementById('mm2d').textContent=fM2(Math.round(precio/modalLote.area*10)/10)+'/m²';
+  }
+  document.getElementById('pr-precio').textContent=fmt(precio);
+  document.getElementById('pr-ini').textContent=fmt(ini);
+  document.getElementById('pr-saldo').textContent=fmt(saldo);
+  document.getElementById('pr-cuota').textContent=fmt(cuota)+'/mes';
+  document.getElementById('m-com').textContent=fmt(com);
+}
+
+function closeModal(){
+  document.getElementById('modalBg').classList.remove('open');
+  modalLote=null;
+}
+
+async function confirmarOp(){
+  if(!modalLote) return;
+  const cliente=document.getElementById('mcliente').value.trim();
+  const tel=document.getElementById('mtel').value.trim();
+  if(!cliente){alert('Ingresa el nombre del cliente');return;}
+  if(!tel){alert('Ingresa el teléfono');return;}
+
+  const precio=+document.getElementById('mprecio').value;
+  const sep=+document.getElementById('p-sep')?.value||500;
+  const ini=+document.getElementById('p-ini')?.value||0;
+  const mesesSel=document.getElementById('p-meses')?.value;
+  const meses=mesesSel==='custom'?(+document.getElementById('p-custom-meses')?.value||24):(+mesesSel||24);
+  const com=Math.round(precio*0.10);
+  const ta=tramoActivo();
+
+  const btn=document.getElementById('bcfm');
+  btn.innerHTML='<span class="spin"></span> Guardando...';
+  btn.disabled=true;
+
+  const opData={
+    fecha:new Date().toLocaleDateString('es-PE'),
+    manzana:modalLote.mz, lote:modalLote.lt, area:modalLote.area,
+    precio, comision:com, neto:precio-com,
+    tipo:tipoOp, separacion:sep, inicial:ini, meses,
+    tramo:tramosData[ta].label, tramoNum:ta,
+    vendedor, cliente, telefono:tel,
+    dni:document.getElementById('mdni').value
+  };
+
+  try{
+    await postToSheet(opData);
+    showToast(tipoOp==='venta'?'✓ Venta registrada':'✓ Reserva registrada');
+    closeModal();
+    await syncFromSheet();
+  }catch(e){
+    const l=POOL.find(x=>x.mz===modalLote.mz&&x.lt==modalLote.lt);
+    if(l){l.est=tipoOp==='venta'?'vendido':'reservado'; l.precioVenta=precio;}
+    opsSheet.push(opData);
+    showToast('Guardado local — sin conexión');
+    closeModal();
+    renderAll();
+  }
+}
+
+function logout(){
+  vendedor='';
+  document.getElementById('loginBg').style.display='flex';
+  document.getElementById('l-user').value='';
+  document.getElementById('l-pass').value='';
+}
+
+// ── NAV & RENDER ──────────────────────────────────────────────────────────────
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function showTab(tab,el){
+  tabActivo=tab;
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  ['lotes','calc','mis','info'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===tab?'block':'none';
+  });
+  renderAll();
+}
+
+function renderAll(){
+  if(!vendedor) return;
+  updateHeader();
+  if(tabActivo==='lotes') renderLotes();
+  if(tabActivo==='calc')  renderCalc();
+  if(tabActivo==='mis')   renderMis();
+  if(tabActivo==='info')  renderInfo();
+}
+</script>
+</body>
+</html>

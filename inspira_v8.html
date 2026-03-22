@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inspira Condominios — Simulador v8</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:13px;background:#f0f4f8;color:#1a202c}
+header{background:#1F3864;color:#fff;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header h1{font-size:15px;font-weight:700;line-height:1.3}
+.subbar{background:#162c4e;color:#90CDF4;padding:4px 18px;font-size:11px;display:flex;gap:18px;flex-wrap:wrap}
+.subbar strong{color:#fff}
+.container{max-width:1440px;margin:0 auto;padding:10px 14px}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:10px}
+.met{background:#fff;border-radius:8px;padding:9px 11px;box-shadow:0 1px 3px rgba(0,0,0,.09)}
+.ml{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.04em;margin-bottom:1px}
+.mv{font-size:16px;font-weight:700}
+.ms{font-size:10px;color:#888;margin-top:1px}
+.pbar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:4px}
+.pfill{height:100%;border-radius:4px;transition:width .4s}
+.tabs{display:flex;gap:2px;border-bottom:2px solid #1F3864;margin-bottom:10px}
+.tab{padding:6px 13px;font-size:12px;cursor:pointer;border:none;background:#e2e8f4;color:#1F3864;font-weight:600;border-radius:4px 4px 0 0;margin-right:2px}
+.tab.active{background:#1F3864;color:#fff}
+.card{background:#fff;border-radius:8px;padding:11px 13px;margin-bottom:9px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.st{font-size:10px;font-weight:700;color:#444;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid #eee}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:#1F3864;color:#fff;padding:6px 7px;text-align:center;font-weight:600;font-size:10px;text-transform:uppercase;white-space:nowrap;position:sticky;top:0;z-index:1}
+td{padding:4px 6px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+tr:hover td{background:#f5f8ff}
+tfoot td{background:#1F3864;color:#fff;font-weight:700;padding:6px 7px}
+.bv{background:#D1FAE5;color:#065F46;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700}
+.ba{background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700}
+.br{background:#FEE2E2;color:#7F1D1D;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700}
+.bg2{background:#F3F4F6;color:#374151;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700}
+.tp{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;display:inline-block}
+input[type=number]{padding:3px 5px;font-size:11px;border:1px solid #d1d5db;border-radius:4px;background:#fff;text-align:right;width:100%}
+input[type=number].param{border-color:#F59E0B;background:#FFFBEB;font-weight:700;color:#92400E;font-size:13px;text-align:center}
+input[type=range]{width:100%}
+select{padding:4px 7px;font-size:11px;border:1px solid #d1d5db;border-radius:4px;background:#fff}
+button.btn{padding:5px 12px;font-size:11px;cursor:pointer;border-radius:4px;border:1px solid #1F3864;background:#1F3864;color:#fff;font-weight:600}
+button.btn:hover{background:#162c4e}
+button.bsm{padding:3px 8px;font-size:10px;cursor:pointer;border-radius:4px;border:1px solid #1F3864;background:#fff;color:#1F3864;font-weight:600}
+button.bsm:hover{background:#1F3864;color:#fff}
+button.bgreen{border-color:#059669!important;background:#059669!important;color:#fff!important}
+button.bred{border-color:#DC2626!important;background:#DC2626!important;color:#fff!important}
+.alert{padding:7px 11px;border-radius:6px;font-size:11px;margin-bottom:9px;border-left:4px solid}
+.ai{background:#EFF6FF;color:#1E3A8A;border-color:#3B82F6}
+.aw{background:#FFFBEB;color:#92400E;border-color:#F59E0B}
+.ao{background:#ECFDF5;color:#065F46;border-color:#10B981}
+.ad{background:#FEF2F2;color:#7F1D1D;border-color:#EF4444}
+.param-box{background:#1F3864;border-radius:8px;padding:11px 13px;margin-bottom:9px}
+.param-box .st{color:#90CDF4;border-color:#2E4A7A}
+.pl{font-size:10px;color:#90CDF4;font-weight:600;margin-bottom:3px}
+.inp-grp{display:flex;flex-direction:column;gap:3px}
+/* Tramo card */
+.tramo-card{border-radius:8px;padding:12px 14px;margin-bottom:8px;border-left:5px solid}
+.tramo-activo{box-shadow:0 0 0 2px #059669, 0 2px 8px rgba(0,0,0,.12)}
+/* Lote grid */
+.lote-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px}
+.lote-btn{border-radius:6px;padding:7px 8px;border:1.5px solid;cursor:pointer;text-align:center;transition:all .15s;background:#fff}
+.lote-btn:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.lote-btn.grande{border-width:2.5px}
+/* Modal */
+.modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;width:380px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:16px;color:#1F3864}
+.modal-field{margin-bottom:12px}
+.modal-field label{font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px}
+.modal-field input,.modal-field select{width:100%;padding:6px 9px;font-size:13px;border:1px solid #d1d5db;border-radius:6px}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-actions button{flex:1;padding:8px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;border:none}
+.btn-confirm{background:#059669;color:#fff}
+.btn-cancel{background:#f0f4f8;color:#555}
+/* Progress tramo */
+.prog-tramo{margin-bottom:10px}
+.prog-row{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.prog-lbl{font-size:11px;min-width:90px;font-weight:600}
+.prog-bar{flex:1;height:16px;background:#f0f0f0;border-radius:8px;overflow:hidden;position:relative}
+.prog-fill{height:100%;border-radius:8px;transition:width .4s;display:flex;align-items:center;padding-left:6px}
+.prog-txt{font-size:9px;font-weight:700;white-space:nowrap}
+.prog-meta{font-size:11px;min-width:100px;text-align:right}
+.badge-activo{background:#ECFDF5;color:#065F46;border:1px solid #6EE7B7;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.badge-completado{background:#EFF6FF;color:#1E3A8A;border:1px solid #93C5FD;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.badge-pendiente{background:#F3F4F6;color:#6B7280;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+@media print{header,.tabs,button,.param-box,.modal-bg{display:none!important}.card{box-shadow:none;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Condominio Inspira de Río Negro — Simulador v8</h1>
+    <div style="font-size:10px;opacity:.75;margin-top:2px">Pool libre de lotes · precio sube automático al cumplir meta m² · lotes grandes priorizados en T1–T2</div>
+  </div>
+  <div style="text-align:right;font-size:10px;opacity:.8" id="hdr"></div>
+</header>
+<div class="subbar">
+  <span>Costo: <strong>S/ 2,000,000</strong></span>
+  <span>ROI meta: <strong>40%</strong></span>
+  <span>Comisión tramos: <strong>10%</strong> · preventa: <strong>15%</strong></span>
+  <span>Competencia: <strong>S/ 110–120/m²</strong></span>
+  <span>Inicio: <strong>Marzo 2026</strong> · 24 meses</span>
+</div>
+
+<!-- MODAL REGISTRO VENTA / RESERVA -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modal-title">Registrar operación</h3>
+    <div class="modal-field">
+      <label>Manzana y lote</label>
+      <div style="font-size:15px;font-weight:700;color:#1F3864;padding:4px 0" id="modal-lote-info">—</div>
+    </div>
+    <div class="modal-field">
+      <label>Área</label>
+      <div style="font-size:13px;color:#555" id="modal-area">—</div>
+    </div>
+    <div class="modal-field">
+      <label>Tramo activo — precio base</label>
+      <div style="font-size:13px;font-weight:700" id="modal-tramo-info">—</div>
+    </div>
+    <div class="modal-field">
+      <label>Tipo de operación</label>
+      <div style="display:flex;gap:8px;margin-top:5px">
+        <button id="btn-tipo-venta" onclick="setTipoOp('vendido')"
+          style="flex:1;padding:9px;font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;
+                 border:2px solid #059669;background:#ECFDF5;color:#065F46;transition:all .15s">
+          ✓ Venta
+        </button>
+        <button id="btn-tipo-reserva" onclick="setTipoOp('reservado')"
+          style="flex:1;padding:9px;font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;
+                 border:2px solid #e5e7eb;background:#F9FAFB;color:#9CA3AF;transition:all .15s">
+          ◷ Reserva
+        </button>
+      </div>
+      <div id="modal-tipo-nota" style="font-size:10px;color:#065F46;margin-top:5px;padding:5px 8px;background:#ECFDF5;border-radius:4px">
+        Venta definitiva — suma m² al tramo activo y puede subir precio.
+      </div>
+    </div>
+    <div class="modal-field">
+      <label id="modal-precio-lbl">Precio de venta (S/) — edita si acordaste otro</label>
+      <input type="number" id="modal-precio" step="100"/>
+    </div>
+    <div class="modal-field">
+      <label>Comisión (10%)</label>
+      <div style="font-size:12px;color:#92400E;font-weight:600" id="modal-com">—</div>
+    </div>
+    <div class="modal-field">
+      <label>Neto al proyecto</label>
+      <div style="font-size:15px;font-weight:700;color:#065F46" id="modal-neto">—</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-confirm" id="btn-confirmar" onclick="confirmarOperacion()" style="background:#059669">✓ Confirmar venta</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+<div class="metrics" id="top-m"></div>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('dashboard',this)">Dashboard ventas</button>
+  <button class="tab" onclick="showTab('pool',this)">Pool de lotes</button>
+  <button class="tab" onclick="showTab('params',this)">Parámetros</button>
+  <button class="tab" onclick="showTab('financiero',this)">Financiero</button>
+  <button class="tab" onclick="showTab('cuadro',this)">Cuadro final</button>
+</div>
+<div id="tab-dashboard"></div>
+<div id="tab-pool"       style="display:none"></div>
+<div id="tab-params"     style="display:none"></div>
+<div id="tab-financiero" style="display:none"></div>
+<div id="tab-cuadro"     style="display:none"></div>
+</div>
+
+<script>
+// ── CONFIGURACIÓN ─────────────────────────────────────────────────────────────
+const CFG = { costo:2000000, roiMeta:40, ir:29.5, comision:10, comFijo:15, compM2:115 };
+
+// Tramos: solo meta en m², precio/m² y período
+const TRAMOS = [
+  { m2Meta:4182, m2Precio:120, periodo:'Mar–Jul 2026',   label:'T1' },
+  { m2Meta:3997, m2Precio:143, periodo:'Ago–Dic 2026',   label:'T2' },
+  { m2Meta:4124, m2Precio:167, periodo:'Ene–May 2027',   label:'T3' },
+  { m2Meta:4139, m2Precio:190, periodo:'Jun–Oct 2027',   label:'T4' },
+  { m2Meta:3504, m2Precio:214, periodo:'Nov 2027–Feb 2028', label:'T5' },
+];
+const TC  = ['#7C3AED','#2563EB','#059669','#D97706','#DC2626'];
+const TBG = ['#EDE9FE','#DBEAFE','#D1FAE5','#FEF3C7','#FEE2E2'];
+const TTC = ['#4C1D95','#1E3A8A','#065F46','#92400E','#7F1D1D'];
+
+const ATTRS = {
+  esquina:  {lbl:'Esquina',          pct:15, tipo:'pos'},
+  ingreso:  {lbl:'Cerca ingreso',    pct:10, tipo:'pos'},
+  rio:      {lbl:'Vista río',        pct:12, tipo:'pos'},
+  amenidad: {lbl:'Cerca amenidades', pct:8,  tipo:'pos'},
+  fondo:    {lbl:'Fondo manzana',    pct:-8, tipo:'neg'},
+  lejos:    {lbl:'Lejos ingreso',    pct:-7, tipo:'neg'},
+};
+
+// ── LOTES ─────────────────────────────────────────────────────────────────────
+// est: 'disponible' | 'reservado' | 'vendido'
+// fijo: true = precio preventa respetado (com 15%)
+// precioVenta: precio real cobrado (solo si vendido/reservado fijo)
+const LOTES = [
+  // FIJOS VENDIDOS
+  {mz:'C',lt:2, area:200,est:'vendido',  fijo:true, precioVenta:16400, attrs:[]},
+  {mz:'C',lt:3, area:200,est:'vendido',  fijo:true, precioVenta:18400, attrs:[]},
+  {mz:'H',lt:7, area:180,est:'vendido',  fijo:true, precioVenta:15200, attrs:[]},
+  {mz:'H',lt:8, area:180,est:'vendido',  fijo:true, precioVenta:15200, attrs:[]},
+  // FIJOS RESERVADOS
+  {mz:'H',lt:1, area:206,est:'reservado',fijo:true, precioVenta:23900, attrs:['esquina','ingreso']},
+  {mz:'H',lt:2, area:180,est:'reservado',fijo:true, precioVenta:16600, attrs:['ingreso']},
+  {mz:'H',lt:3, area:180,est:'reservado',fijo:true, precioVenta:16600, attrs:[]},
+  {mz:'H',lt:4, area:180,est:'reservado',fijo:true, precioVenta:16600, attrs:[]},
+  {mz:'I',lt:3, area:229,est:'reservado',fijo:true, precioVenta:21000, attrs:[]},
+  {mz:'J',lt:2, area:150,est:'reservado',fijo:true, precioVenta:13700, attrs:[]},
+  {mz:'C',lt:4, area:200,est:'reservado',fijo:true, precioVenta:18400, attrs:[]},
+  // POOL LIBRE — todos disponibles (el cliente elige)
+  {mz:'A',lt:1, area:272,est:'disponible',attrs:['ingreso']},
+  {mz:'A',lt:2, area:188,est:'disponible',attrs:['fondo']},
+  {mz:'A',lt:3, area:222,est:'disponible',attrs:[]},
+  {mz:'A',lt:4, area:249,est:'disponible',attrs:[]},
+  {mz:'A',lt:5, area:298,est:'disponible',attrs:['esquina','rio']},
+  {mz:'B',lt:1, area:179,est:'disponible',attrs:['esquina']},
+  {mz:'B',lt:2, area:200,est:'disponible',attrs:[]},
+  {mz:'B',lt:3, area:200,est:'disponible',attrs:[]},
+  {mz:'B',lt:4, area:200,est:'disponible',attrs:[]},
+  {mz:'B',lt:5, area:200,est:'disponible',attrs:[]},
+  {mz:'B',lt:6, area:200,est:'disponible',attrs:['fondo']},
+  {mz:'B',lt:7, area:200,est:'disponible',attrs:['fondo']},
+  {mz:'B',lt:8, area:200,est:'disponible',attrs:[]},
+  {mz:'B',lt:9, area:200,est:'disponible',attrs:[]},
+  {mz:'B',lt:10,area:200,est:'disponible',attrs:[]},
+  {mz:'B',lt:11,area:200,est:'disponible',attrs:[]},
+  {mz:'B',lt:12,area:200,est:'disponible',attrs:[]},
+  {mz:'B',lt:13,area:172,est:'disponible',attrs:['esquina']},
+  {mz:'C',lt:1, area:202,est:'disponible',attrs:['esquina']},
+  {mz:'C',lt:5, area:200,est:'disponible',attrs:[]},
+  {mz:'C',lt:6, area:200,est:'disponible',attrs:['fondo']},
+  {mz:'C',lt:7, area:200,est:'disponible',attrs:['fondo']},
+  {mz:'C',lt:8, area:200,est:'disponible',attrs:[]},
+  {mz:'C',lt:9, area:200,est:'disponible',attrs:[]},
+  {mz:'C',lt:10,area:200,est:'disponible',attrs:[]},
+  {mz:'C',lt:11,area:200,est:'disponible',attrs:[]},
+  {mz:'C',lt:12,area:200,est:'disponible',attrs:[]},
+  {mz:'C',lt:13,area:200,est:'disponible',attrs:[]},
+  {mz:'C',lt:14,area:200,est:'disponible',attrs:[]},
+  {mz:'C',lt:15,area:200,est:'disponible',attrs:[]},
+  {mz:'C',lt:16,area:200,est:'disponible',attrs:[]},
+  {mz:'C',lt:17,area:169,est:'disponible',attrs:['esquina']},
+  {mz:'E',lt:1, area:228,est:'disponible',attrs:['esquina','amenidad']},
+  {mz:'E',lt:2, area:200,est:'disponible',attrs:['amenidad']},
+  {mz:'E',lt:3, area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:4, area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:5, area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:6, area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:7, area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:8, area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:9, area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:10,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:11,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:12,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:13,area:211,est:'disponible',attrs:[]},
+  {mz:'E',lt:14,area:223,est:'disponible',attrs:[]},
+  {mz:'E',lt:15,area:198,est:'disponible',attrs:[]},
+  {mz:'E',lt:16,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:17,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:18,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:19,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:20,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:21,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:22,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:23,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:24,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:25,area:200,est:'disponible',attrs:[]},
+  {mz:'E',lt:26,area:284,est:'disponible',attrs:['esquina']},
+  {mz:'F',lt:1, area:208,est:'disponible',attrs:['esquina','amenidad']},
+  {mz:'F',lt:2, area:200,est:'disponible',attrs:['amenidad']},
+  {mz:'F',lt:3, area:200,est:'disponible',attrs:[]},
+  {mz:'F',lt:4, area:200,est:'disponible',attrs:[]},
+  {mz:'F',lt:5, area:222,est:'disponible',attrs:['esquina']},
+  {mz:'F',lt:6, area:256,est:'disponible',attrs:[]},
+  {mz:'F',lt:7, area:192,est:'disponible',attrs:['fondo']},
+  {mz:'F',lt:8, area:179,est:'disponible',attrs:['fondo','lejos']},
+  {mz:'F',lt:9, area:198,est:'disponible',attrs:['esquina']},
+  {mz:'G',lt:1, area:188,est:'disponible',attrs:['esquina']},
+  {mz:'G',lt:2, area:200,est:'disponible',attrs:[]},
+  {mz:'G',lt:3, area:200,est:'disponible',attrs:[]},
+  {mz:'G',lt:4, area:200,est:'disponible',attrs:[]},
+  {mz:'G',lt:5, area:200,est:'disponible',attrs:[]},
+  {mz:'G',lt:6, area:200,est:'disponible',attrs:['fondo']},
+  {mz:'G',lt:7, area:191,est:'disponible',attrs:['fondo']},
+  {mz:'G',lt:8, area:313,est:'disponible',attrs:['esquina','rio']},
+  {mz:'G',lt:9, area:200,est:'disponible',attrs:[]},
+  {mz:'G',lt:10,area:200,est:'disponible',attrs:[]},
+  {mz:'G',lt:11,area:200,est:'disponible',attrs:[]},
+  {mz:'G',lt:12,area:200,est:'disponible',attrs:[]},
+  {mz:'G',lt:13,area:200,est:'disponible',attrs:[]},
+  {mz:'G',lt:14,area:244,est:'disponible',attrs:['esquina','ingreso']},
+  {mz:'H',lt:5, area:180,est:'disponible',attrs:[]},
+  {mz:'H',lt:6, area:180,est:'disponible',attrs:[]},
+  {mz:'H',lt:9, area:288,est:'disponible',attrs:['esquina']},
+  {mz:'I',lt:1, area:210,est:'disponible',attrs:['esquina']},
+  {mz:'I',lt:2, area:211,est:'disponible',attrs:[]},
+  {mz:'J',lt:1, area:150,est:'disponible',attrs:['esquina']},
+  {mz:'J',lt:3, area:150,est:'disponible',attrs:[]},
+  {mz:'J',lt:4, area:151,est:'disponible',attrs:['esquina']},
+  {mz:'K',lt:1, area:150,est:'disponible',attrs:['esquina']},
+  {mz:'K',lt:2, area:150,est:'disponible',attrs:['lejos']},
+  {mz:'K',lt:3, area:150,est:'disponible',attrs:['lejos']},
+  {mz:'K',lt:4, area:90, est:'disponible',attrs:['lejos','fondo']},
+  {mz:'K',lt:5, area:150,est:'disponible',attrs:['lejos']},
+  {mz:'K',lt:6, area:150,est:'disponible',attrs:['lejos']},
+  {mz:'K',lt:7, area:150,est:'disponible',attrs:['lejos']},
+  {mz:'K',lt:8, area:150,est:'disponible',attrs:['esquina']},
+  {mz:'L',lt:1, area:150,est:'disponible',attrs:['lejos']},
+  {mz:'L',lt:2, area:150,est:'disponible',attrs:['lejos']},
+  {mz:'L',lt:3, area:150,est:'disponible',attrs:['lejos']},
+  {mz:'L',lt:4, area:150,est:'disponible',attrs:['lejos','esquina']},
+];
+
+// ── ESTADO DEL SIMULADOR ──────────────────────────────────────────────────────
+// tramoActivo: índice 0–4 del tramo actual
+// m2VendidosTramo: m² vendidos en el tramo actual (se resetea al subir)
+// ventasRegistradas: historial completo
+let estado = {
+  tramoActivo: 0,
+  m2AcumPorTramo: [0,0,0,0,0],  // m² acumulados vendidos en cada tramo
+  ventasRegistradas: [],          // {mz,lt,area,precio,com,neto,tramo,fecha}
+};
+
+// Modal temporal
+let modalLote = null;
+
+// ── CALCULAR TRAMO ACTIVO ─────────────────────────────────────────────────────
+function calcTramoActivo(){
+  for(let t=0;t<5;t++){
+    if(estado.m2AcumPorTramo[t] < TRAMOS[t].m2Meta) return t;
+  }
+  return 4; // todos completados, mantener T5
+}
+
+function precioLote(l){
+  if(l.fijo) return l.precioVenta;
+  if(l.precioVenta) return l.precioVenta; // vendido en pool
+  const key=l.mz+'-'+l.lt;
+  if(PRECIO_MANUAL[key]!==undefined) return PRECIO_MANUAL[key];
+  const t = calcTramoActivo();
+  let ap=0; (l.attrs||[]).forEach(a=>{if(ATTRS[a])ap+=ATTRS[a].pct;});
+  return Math.round(l.area * TRAMOS[t].m2Precio * (1+ap/100));
+}
+
+function calcAll(){
+  const ta = calcTramoActivo();
+  const pool = LOTES.filter(l=>!l.fijo);
+  const fijos = LOTES.filter(l=>l.fijo);
+  const vendPool = pool.filter(l=>l.est==='vendido'||l.est==='reservado');
+  const dispPool = pool.filter(l=>l.est==='disponible');
+
+  // Ingresos reales ya cobrados
+  const ingFijo = fijos.reduce((s,l)=>s+l.precioVenta,0);
+  const comFijo = Math.round(ingFijo*CFG.comFijo/100);
+  const netoFijo = ingFijo - comFijo;
+
+  const ingPool = vendPool.reduce((s,l)=>s+(l.precioVenta||0),0);
+  const comPool = Math.round(ingPool*CFG.comision/100);
+  const netoPool = ingPool - comPool;
+
+  // Proyección de lotes disponibles por tramo escalonado
+  // Simular cómo se llenarían los tramos con los lotes disponibles restantes
+  let m2Sim = [...estado.m2AcumPorTramo]; // copia del estado actual
+  let tramoSim = ta;
+  const dispOrdenados = [...dispPool].sort((a,b)=>b.area-a.area); // grandes primero
+
+  let ingProy = 0;
+  const ingPorTramo = [0,0,0,0,0];
+
+  for(const l of dispOrdenados){
+    const key=l.mz+'-'+l.lt;
+    // Si tiene precio manual, usar ese
+    if(PRECIO_MANUAL[key]!==undefined){
+      const p=PRECIO_MANUAL[key];
+      ingProy+=p;
+      ingPorTramo[tramoSim]+=p;
+      m2Sim[tramoSim]+=l.area;
+      if(m2Sim[tramoSim]>=TRAMOS[tramoSim].m2Meta&&tramoSim<4) tramoSim++;
+      continue;
+    }
+    // Calcular precio al tramo simulado
+    let ap=0; (l.attrs||[]).forEach(a=>{if(ATTRS[a])ap+=ATTRS[a].pct;});
+    const p=Math.round(l.area*TRAMOS[tramoSim].m2Precio*(1+ap/100));
+    ingProy+=p;
+    ingPorTramo[tramoSim]+=p;
+    m2Sim[tramoSim]+=l.area;
+    if(m2Sim[tramoSim]>=TRAMOS[tramoSim].m2Meta&&tramoSim<4) tramoSim++;
+  }
+
+  const comProy = Math.round(ingProy*CFG.comision/100);
+  const netoProy = ingProy - comProy;
+
+  const ingTotal = ingFijo + ingPool + ingProy;
+  const comTotal = comFijo + comPool + comProy;
+  const ingPorTramoTotal = ingPorTramo;
+  const netoTotal = ingTotal - comTotal;
+  const utilBruta = netoTotal - CFG.costo;
+  const ir = utilBruta>0?Math.round(utilBruta*CFG.ir/100):0;
+  const utilNeta = utilBruta - ir;
+  const roi = Math.round(utilNeta/CFG.costo*1000)/10;
+
+  const bMeta = (CFG.costo*CFG.roiMeta/100/(1-CFG.ir/100)+CFG.costo)/(1-CFG.comision/100);
+  const gap = ingTotal - bMeta;
+
+  const m2Vendido = vendPool.reduce((s,l)=>s+l.area,0);
+  const m2Total = pool.reduce((s,l)=>s+l.area,0);
+
+  const m2AcumTotal = estado.m2AcumPorTramo.reduce((a,b)=>a+b,0);
+
+  return{ta,fijos,pool,vendPool,dispPool,ingFijo,comFijo,netoFijo,
+         ingPool,ingTotal,comTotal,netoTotal,utilBruta,ir,utilNeta,roi,
+         bMeta,gap,m2Vendido,m2Total,m2AcumTotal,ingPorTramoTotal};
+}
+
+function recalcTramos(){
+  const ingF = LOTES.filter(l=>l.fijo).reduce((s,l)=>s+Math.round(l.precioVenta*(1-CFG.comFijo/100)),0);
+  const unMeta=CFG.costo*CFG.roiMeta/100;
+  const ubMeta=unMeta/(1-CFG.ir/100);
+  const netoMeta=CFG.costo+ubMeta;
+  const netoTramos=netoMeta-ingF;
+  const ingTramos=netoTramos/(1-CFG.comision/100);
+  const T1=TRAMOS[0].m2Precio;
+  const metas=TRAMOS.map(t=>t.m2Meta);
+  const AT=metas.reduce((a,b)=>a+b,0);
+  const cd=metas.reduce((s,a,i)=>s+i*a,0);
+  const d=(ingTramos-T1*AT)/cd;
+  for(let i=1;i<5;i++) TRAMOS[i].m2Precio=Math.round(T1+i*d);
+}
+
+const fmt=n=>'S/ '+Math.round(n).toLocaleString('es-PE');
+const fM2=n=>'S/ '+(Math.round(n*10)/10).toFixed(1);
+const fp =n=>(Math.round(n*10)/10)+'%';
+
+function tpill(t){
+  return`<span class="tp" style="background:${TBG[t]};color:${TTC[t]}">${TRAMOS[t].label} · ${fM2(TRAMOS[t].m2Precio)}/m²</span>`;
+}
+
+let activeTab='dashboard', chartF=null;
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+let tipoOperacion = 'vendido'; // 'vendido' | 'reservado'
+
+function setTipoOp(tipo){
+  tipoOperacion = tipo;
+  const esVenta = tipo==='vendido';
+  // Botón venta
+  document.getElementById('btn-tipo-venta').style.borderColor  = esVenta?'#059669':'#e5e7eb';
+  document.getElementById('btn-tipo-venta').style.background   = esVenta?'#ECFDF5':'#F9FAFB';
+  document.getElementById('btn-tipo-venta').style.color        = esVenta?'#065F46':'#9CA3AF';
+  // Botón reserva
+  document.getElementById('btn-tipo-reserva').style.borderColor= !esVenta?'#D97706':'#e5e7eb';
+  document.getElementById('btn-tipo-reserva').style.background = !esVenta?'#FFFBEB':'#F9FAFB';
+  document.getElementById('btn-tipo-reserva').style.color      = !esVenta?'#92400E':'#9CA3AF';
+  // Nota y botón confirmar
+  document.getElementById('modal-tipo-nota').textContent = esVenta
+    ? 'Venta definitiva — suma m² al tramo activo y puede activar subida de precio.'
+    : 'Reserva — el lote queda apartado pero NO suma m² al tramo. El precio no sube hasta que sea venta.';
+  document.getElementById('modal-tipo-nota').style.background = esVenta?'#ECFDF5':'#FFFBEB';
+  document.getElementById('modal-tipo-nota').style.color      = esVenta?'#065F46':'#92400E';
+  document.getElementById('btn-confirmar').textContent        = esVenta?'✓ Confirmar venta':'◷ Confirmar reserva';
+  document.getElementById('btn-confirmar').style.background   = esVenta?'#059669':'#D97706';
+  document.getElementById('modal-precio-lbl').textContent     = esVenta
+    ? 'Precio de venta (S/) — edita si acordaste otro'
+    : 'Precio de reserva (S/) — precio que se respetará';
+}
+
+function abrirModal(mz,lt){
+  const l=LOTES.find(x=>x.mz===mz&&x.lt==lt);
+  if(!l||l.fijo||l.est!=='disponible') return;
+  const key=mz+'-'+lt;
+  const ta=calcTramoActivo();
+  let ap=0; (l.attrs||[]).forEach(a=>{if(ATTRS[a])ap+=ATTRS[a].pct;});
+  const precioAuto=Math.round(l.area*TRAMOS[ta].m2Precio*(1+ap/100));
+  const precio=PRECIO_MANUAL[key]!==undefined?PRECIO_MANUAL[key]:precioAuto;
+  abrirModalConPrecio(mz,lt,precio);
+}
+
+function closeModal(){
+  document.getElementById('modalBg').classList.remove('open');
+  modalLote=null;
+}
+
+function confirmarOperacion(){
+  if(!modalLote) return;
+  const l=LOTES.find(x=>x.mz===modalLote.mz&&x.lt==modalLote.lt);
+  if(!l) return;
+  const precio=+document.getElementById('modal-precio').value;
+  const ta=calcTramoActivo();
+  const com=Math.round(precio*CFG.comision/100);
+  const neto=precio-com;
+  const esVenta=tipoOperacion==='vendido';
+
+  l.est=tipoOperacion;
+  l.precioVenta=precio;
+
+  // Solo las ventas suman m² al tramo y pueden disparar subida de precio
+  if(esVenta){
+    estado.m2AcumPorTramo[ta]+=l.area;
+  }
+
+  estado.ventasRegistradas.push({
+    mz:l.mz, lt:l.lt, area:l.area, precio, com, neto,
+    m2Precio:Math.round(precio/l.area*10)/10,
+    tramo:ta, tipo:tipoOperacion,
+    fecha:new Date().toLocaleDateString('es-PE')
+  });
+
+  closeModal();
+  renderAll();
+
+  // Verificar subida de tramo (solo en ventas)
+  if(esVenta){
+    const taNuevo=calcTramoActivo();
+    if(taNuevo>ta){
+      setTimeout(()=>{
+        alert(`🎉 ¡Meta del Tramo ${ta+1} alcanzada!\nPrecio sube a S/ ${TRAMOS[taNuevo].m2Precio}/m²\n(${TRAMOS[taNuevo].label} — ${TRAMOS[taNuevo].periodo})`);
+      },200);
+    }
+  }
+}
+
+// Mantener compatibilidad con llamadas antiguas
+function confirmarVenta(){ confirmarOperacion(); }
+
+// ── CONVERTIR RESERVA → VENTA ─────────────────────────────────────────────────
+function convertirReservaVenta(mz,lt){
+  const l=LOTES.find(x=>x.mz===mz&&x.lt==lt);
+  if(!l||l.fijo||l.est!=='reservado') return;
+  const ta=calcTramoActivo();
+
+  // Abrir modal pre-cargado con el precio de la reserva y tipo=venta
+  modalLote={mz,lt};
+  tipoOperacion='vendido';
+  const precio=l.precioVenta||0;
+  const com=Math.round(precio*CFG.comision/100);
+  const neto=precio-com;
+
+  document.getElementById('modal-title').textContent=`Convertir reserva a venta — Mz ${mz} Lt ${lt}`;
+  document.getElementById('modal-lote-info').textContent=`Manzana ${mz} · Lote ${lt}`;
+  document.getElementById('modal-area').textContent=`${l.area} m²  ${l.area>250?'⭐ Lote grande':''}`;
+  document.getElementById('modal-tramo-info').innerHTML=`${tpill(ta)} · precio de reserva: ${fmt(precio)}`;
+  document.getElementById('modal-precio').value=precio;
+  document.getElementById('modal-com').textContent=`${CFG.comision}% = ${fmt(com)}`;
+  document.getElementById('modal-neto').textContent=fmt(neto);
+
+  // Forzar tipo venta y deshabilitar botón reserva
+  setTipoOp('vendido');
+  document.getElementById('btn-tipo-reserva').style.opacity='0.4';
+  document.getElementById('btn-tipo-reserva').style.pointerEvents='none';
+  document.getElementById('modal-precio-lbl').textContent='Precio (heredado de la reserva — puedes ajustar)';
+
+  document.getElementById('modal-precio').oninput=function(){
+    const p=+this.value;
+    const c2=Math.round(p*CFG.comision/100);
+    document.getElementById('modal-com').textContent=`${CFG.comision}% = ${fmt(c2)}`;
+    document.getElementById('modal-neto').textContent=fmt(p-c2);
+  };
+
+  // Primero revertir el estado de reservado a disponible para que confirmarOperacion lo procese bien
+  l.est='disponible';
+  l.precioVenta=undefined;
+
+  // Rehabilitar botón reserva al cerrar
+  const origClose=closeModal;
+  window._closeModalOrig=origClose;
+  document.getElementById('btn-tipo-reserva').style.opacity='';
+  document.getElementById('btn-tipo-reserva').style.pointerEvents='';
+
+  document.getElementById('modalBg').classList.add('open');
+}
+
+// ── LIBERAR RESERVA ───────────────────────────────────────────────────────────
+function liberarReserva(mz,lt){
+  if(!confirm(`¿Liberar la reserva del lote Mz ${mz}-${lt}?\nEl lote quedará disponible nuevamente.`)) return;
+  const l=LOTES.find(x=>x.mz===mz&&x.lt==lt);
+  if(!l||l.fijo) return;
+
+  // Quitar del historial si estaba registrada
+  const idx=estado.ventasRegistradas.findIndex(v=>v.mz===mz&&v.lt==lt&&v.tipo==='reservado');
+  if(idx>=0) estado.ventasRegistradas.splice(idx,1);
+
+  l.est='disponible';
+  l.precioVenta=undefined;
+  renderAll();
+}
+
+// ── TAB: DASHBOARD ────────────────────────────────────────────────────────────
+function renderDashboard(c){
+  const ta=c.ta;
+  const m2TramoActual=estado.m2AcumPorTramo[ta];
+  const metaTramo=TRAMOS[ta].m2Meta;
+  const pctTramo=Math.min(100,Math.round(m2TramoActual/metaTramo*100));
+
+  // Barras de progreso por tramo
+  const progBars=TRAMOS.map((t,i)=>{
+    const m2v=estado.m2AcumPorTramo[i];
+    const pct=Math.min(100,Math.round(m2v/t.m2Meta*100));
+    const completado=m2v>=t.m2Meta;
+    const esActivo=i===ta&&!completado;
+    let badge=completado?`<span class="badge-completado">Completado</span>`:
+              esActivo?`<span class="badge-activo">Activo</span>`:
+              `<span class="badge-pendiente">Pendiente</span>`;
+    return`<div class="prog-tramo">
+      <div class="prog-row">
+        <div class="prog-lbl" style="color:${TTC[i]}">${t.label} · S/${t.m2Precio}/m²</div>
+        <div style="flex:1;font-size:10px;color:#666">${t.periodo}</div>
+        ${badge}
+        <div class="prog-meta">${m2v.toLocaleString()} / ${t.m2Meta.toLocaleString()} m²</div>
+      </div>
+      <div class="prog-bar">
+        <div class="prog-fill" style="width:${pct}%;background:${completado?'#3B82F6':TC[i]}">
+          <span class="prog-txt" style="color:#fff">${pct}%</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Ventas recientes
+  const ventasRecientes=[...estado.ventasRegistradas].reverse().slice(0,8);
+  const ventasRows=ventasRecientes.length===0
+    ?`<tr><td colspan="8" style="text-align:center;color:#888;padding:12px">Sin operaciones registradas aún</td></tr>`
+    :ventasRecientes.map(v=>`<tr>
+        <td style="text-align:center;font-weight:700">${v.mz}-${v.lt}</td>
+        <td style="text-align:right">${v.area}m²</td>
+        <td>${tpill(v.tramo)}</td>
+        <td style="text-align:center">
+          ${v.tipo==='reservado'
+            ?'<span class="ba" style="font-size:9px">Reserva</span>'
+            :'<span class="bv" style="font-size:9px">Venta</span>'}
+        </td>
+        <td style="text-align:right">${fM2(v.m2Precio)}</td>
+        <td style="text-align:right;font-weight:700">${fmt(v.precio)}</td>
+        <td style="text-align:right;color:#92400E">${fmt(v.com)}</td>
+        <td style="text-align:right;color:#065F46;font-weight:700">${fmt(v.neto)}</td>
+      </tr>`).join('');
+
+  // Alerta lotes grandes disponibles
+  const grandesDisp=LOTES.filter(l=>!l.fijo&&l.est==='disponible'&&l.area>250);
+  const alertaGrandes=grandesDisp.length>0?`
+    <div class="aw alert">
+      ⭐ <strong>${grandesDisp.length} lotes grandes (>250m²) disponibles</strong> — conviene venderlos pronto antes que suban de tramo:
+      ${grandesDisp.map(l=>`<strong>Mz${l.mz}-${l.lt}</strong> (${l.area}m² · ${fmt(Math.round(l.area*TRAMOS[ta].m2Precio*(1+(l.attrs||[]).reduce((s,a)=>s+(ATTRS[a]?ATTRS[a].pct:0),0)/100)))})`).join(' · ')}
+    </div>`:'';
+
+  document.getElementById('tab-dashboard').innerHTML=`
+    ${alertaGrandes}
+    <div style="display:grid;grid-template-columns:3fr 2fr;gap:10px">
+      <div>
+        <div class="card">
+          <div class="st">Progreso de tramos — m² vendidos vs meta</div>
+          <div style="background:${TBG[ta]};border-radius:6px;padding:10px 12px;margin-bottom:12px;border-left:4px solid ${TC[ta]}">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:13px;font-weight:700;color:${TTC[ta]}">Tramo activo: ${TRAMOS[ta].label} — S/${TRAMOS[ta].m2Precio}/m²</span>
+              <span style="font-size:11px;color:${TTC[ta]}">${TRAMOS[ta].periodo}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="flex:1">
+                <div class="pbar" style="height:16px">
+                  <div class="pfill" style="width:${pctTramo}%;background:${TC[ta]};height:100%;display:flex;align-items:center;padding-left:6px">
+                    <span style="font-size:10px;font-weight:700;color:#fff">${pctTramo}%</span>
+                  </div>
+                </div>
+              </div>
+              <span style="font-size:13px;font-weight:700;color:${TTC[ta]}">${m2TramoActual.toLocaleString()} / ${metaTramo.toLocaleString()} m²</span>
+            </div>
+            <div style="font-size:10px;color:${TTC[ta]};margin-top:5px">
+              Faltan <strong>${(metaTramo-m2TramoActual).toLocaleString()} m²</strong> para subir a ${ta<4?TRAMOS[ta+1].label+' (S/'+TRAMOS[ta+1].m2Precio+'/m²)':'precio máximo alcanzado'}
+            </div>
+          </div>
+          ${progBars}
+        </div>
+        <div class="card">
+          <div class="st">Ventas recientes registradas</div>
+          <div class="tw"><table>
+            <thead><tr><th>Lote</th><th>Área</th><th>Tramo</th><th>Tipo</th><th>S/m²</th><th>Precio</th><th>Comisión</th><th>Neto</th></tr></thead>
+            <tbody>${ventasRows}</tbody>
+          </table></div>
+          ${estado.ventasRegistradas.length>0?`<div style="font-size:10px;color:#888;margin-top:6px;text-align:right">${estado.ventasRegistradas.length} operaciones · Total neto: ${fmt(estado.ventasRegistradas.reduce((s,v)=>s+v.neto,0))}</div>`:''}
+        </div>
+
+        ${(()=>{
+          const reservasPend=LOTES.filter(l=>!l.fijo&&l.est==='reservado');
+          if(reservasPend.length===0) return '';
+          const rows=reservasPend.map(l=>`<tr>
+            <td style="text-align:center;font-weight:700">${l.mz}-${l.lt}</td>
+            <td style="text-align:right">${l.area}m²</td>
+            <td style="text-align:right;font-weight:700">${fmt(l.precioVenta||0)}</td>
+            <td style="text-align:right">${fM2(Math.round((l.precioVenta||0)/l.area*10)/10)}</td>
+            <td style="text-align:center;display:flex;gap:4px;justify-content:center">
+              <button class="bsm bgreen" onclick="convertirReservaVenta('${l.mz}','${l.lt}')"
+                style="font-size:9px;padding:2px 6px">✓ Venta</button>
+              <button class="bsm" onclick="liberarReserva('${l.mz}','${l.lt}')"
+                style="font-size:9px;padding:2px 5px;border-color:#DC2626;color:#DC2626">✕</button>
+            </td>
+          </tr>`).join('');
+          return`<div class="card">
+            <div class="st" style="color:#92400E">◷ Reservas pendientes (${reservasPend.length})</div>
+            <table style="font-size:11px">
+              <thead><tr><th>Lote</th><th>Área</th><th>Precio</th><th>S/m²</th><th>Acción</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+        })()}
+      </div>
+      <div>
+        <div class="card">
+          <div class="st">Acceso rápido — registrar venta</div>
+          <div style="font-size:11px;color:#555;margin-bottom:10px">Selecciona la manzana y el lote que el cliente eligió:</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+            ${[...new Set(LOTES.filter(l=>!l.fijo&&l.est==='disponible').map(l=>l.mz))].map(mz=>`
+              <button class="bsm" onclick="filtrarMz('${mz}')" id="mz-btn-${mz}">${mz}</button>`).join('')}
+            <button class="bsm" onclick="filtrarMz('todas')" id="mz-btn-todas">Todas</button>
+          </div>
+          <div id="lote-selector" style="max-height:380px;overflow-y:auto"></div>
+        </div>
+        <div class="card" style="margin-top:0">
+          <div class="st">Resumen financiero rápido</div>
+          <table style="font-size:11px">
+            <tr><td style="color:#555;padding:3px 0">Ventas nuevas registradas</td><td style="text-align:right;font-weight:700">${estado.ventasRegistradas.length} lotes</td></tr>
+            <tr><td style="color:#555;padding:3px 0">m² vendidos (pool)</td><td style="text-align:right;font-weight:700">${c.m2Vendido.toLocaleString()} / ${c.m2Total.toLocaleString()} m²</td></tr>
+            <tr><td style="color:#555;padding:3px 0">Ingreso bruto captado</td><td style="text-align:right;font-weight:700;color:#065F46">${fmt(c.ingFijo+c.ingPool)}</td></tr>
+            <tr><td style="color:#555;padding:3px 0">Ingreso proyectado total</td><td style="text-align:right;font-weight:700">${fmt(c.ingTotal)}</td></tr>
+            <tr><td style="color:#555;padding:3px 0">ROI proyectado</td><td style="text-align:right;font-weight:700;color:${c.roi>=CFG.roiMeta?'#065F46':'#92400E'}">${fp(c.roi)}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  filtrarMz(mzFiltro);
+}
+
+let mzFiltro='todas';
+function filtrarMz(mz){
+  mzFiltro=mz;
+  document.querySelectorAll('[id^="mz-btn-"]').forEach(b=>b.style.background='');
+  const btn=document.getElementById('mz-btn-'+mz);
+  if(btn) btn.style.background='#1F3864', btn.style.color='#fff';
+  const ta=calcTramoActivo();
+  const disp=LOTES.filter(l=>!l.fijo&&l.est==='disponible'&&(mz==='todas'||l.mz===mz));
+  const sel=document.getElementById('lote-selector');
+  if(!sel) return;
+  sel.innerHTML=`<div class="lote-grid">${disp.map(l=>{
+    const key=l.mz+'-'+l.lt;
+    let ap=0; (l.attrs||[]).forEach(a=>{if(ATTRS[a])ap+=ATTRS[a].pct;});
+    const precioAuto=Math.round(l.area*TRAMOS[ta].m2Precio*(1+ap/100));
+    const precio=PRECIO_MANUAL[key]!==undefined?PRECIO_MANUAL[key]:precioAuto;
+    const tieneManual=PRECIO_MANUAL[key]!==undefined;
+    const grande=l.area>250;
+    const borderCol=tieneManual?'#3B82F6':grande?TC[0]:'#d1d5db';
+    const bgCol=tieneManual?'#EFF6FF':grande?TBG[0]:'#fff';
+    const titleCol=tieneManual?'#1E40AF':grande?TTC[0]:'#1F3864';
+    const attrIcons=(l.attrs||[]).map(a=>ATTRS[a]?`<span style="font-size:8px;color:${ATTRS[a].tipo==='pos'?'#1E3A8A':'#7F1D1D'}">${ATTRS[a].lbl}</span>`:'').join(' ');
+    return`<div class="lote-btn ${grande?'grande':''}"
+      style="border-color:${borderCol};background:${bgCol}"
+      onclick="abrirModal('${l.mz}','${l.lt}')">
+      <div style="font-size:12px;font-weight:700;color:${titleCol}">Mz ${l.mz}-${l.lt}${tieneManual?' M':''}</div>
+      <div style="font-size:10px;color:#666">${l.area}m²${grande?' ⭐':''}</div>
+      <div style="font-size:11px;font-weight:700;color:#065F46;margin-top:2px">${fmt(precio)}</div>
+      <div style="font-size:9px;color:#888">${fM2(Math.round(precio/l.area*10)/10)}/m²</div>
+      ${attrIcons?`<div style="margin-top:2px">${attrIcons}</div>`:''}
+    </div>`;
+  }).join('')}${disp.length===0?'<div style="font-size:11px;color:#888;padding:8px">Sin lotes disponibles</div>':''}</div>`;
+}
+
+// ── OVERRIDES DE PRECIO MANUAL POR LOTE ──────────────────────────────────────
+const PRECIO_MANUAL = {}; // key: 'mz-lt' → precio manual
+
+// ── TAB: POOL DE LOTES ────────────────────────────────────────────────────────
+function renderPool(c){
+  const ta=c.ta;
+  const mzF=document.getElementById('pool-mz')?document.getElementById('pool-mz').value:'todas';
+  const estF=document.getElementById('pool-est')?document.getElementById('pool-est').value:'todos';
+  const mzs=[...new Set(LOTES.map(l=>l.mz))];
+  const filtered=LOTES.filter(l=>
+    (mzF==='todas'||l.mz===mzF)&&
+    (estF==='todos'||l.est===estF)
+  );
+
+  const rows=filtered.map(l=>{
+    const key=l.mz+'-'+l.lt;
+    const tieneManual=PRECIO_MANUAL[key]!==undefined;
+    let ap=0; (l.attrs||[]).forEach(a=>{if(ATTRS[a])ap+=ATTRS[a].pct;});
+    const precioAuto=l.fijo||l.precioVenta
+      ? (l.precioVenta||0)
+      : Math.round(l.area*TRAMOS[ta].m2Precio*(1+ap/100));
+    const precio = (!l.fijo && !l.precioVenta && tieneManual) ? PRECIO_MANUAL[key] : precioAuto;
+    const m2p=Math.round(precio/l.area*10)/10;
+    const comRate=l.fijo?CFG.comFijo:CFG.comision;
+    const com=Math.round(precio*comRate/100);
+    const neto=precio-com;
+    const grande=l.area>250;
+    const bc=l.est==='vendido'?'br':l.est==='reservado'?'ba':'bv';
+    const esEditable=!l.fijo&&l.est==='disponible';
+
+    // Botones de atributos
+    const attrBtns=Object.entries(ATTRS).map(([id,a])=>{
+      const on=(l.attrs||[]).includes(id);
+      const abg=on?(a.tipo==='pos'?'#DBEAFE':'#FEE2E2'):'#F3F4F6';
+      const atc=on?(a.tipo==='pos'?'#1E3A8A':'#7F1D1D'):'#9CA3AF';
+      const abr=on?(a.tipo==='pos'?'#93C5FD':'#FCA5A5'):'#E5E7EB';
+      const aoc=esEditable?`toggleAttrPool('${l.mz}','${l.lt}','${id}')`:'';
+      const acur=esEditable?'pointer':'default';
+      const atit=esEditable?'Clic para activar/desactivar':'';
+      const asgn=a.tipo==='pos'?'+':'';
+      return`<span onclick="${aoc}" style="font-size:9px;padding:2px 6px;border-radius:6px;background:${abg};color:${atc};cursor:${acur};display:inline-block;margin:1px;font-weight:600;border:1px solid ${abr}" title="${atit}">${asgn}${a.pct}% ${a.lbl}</span>`;
+    }).join('');
+
+    // Campo precio manual
+    const campoPrecio=esEditable
+      ?`<div style="display:flex;align-items:center;gap:4px">
+          <input type="number" value="${precio}" step="100"
+            style="width:90px;font-size:11px;border:1px solid ${tieneManual?'#3B82F6':'#d1d5db'};
+                   background:${tieneManual?'#EFF6FF':'#fff'};border-radius:4px;padding:2px 5px;text-align:right;
+                   font-weight:${tieneManual?'700':'400'};color:${tieneManual?'#1E40AF':'inherit'}"
+            onchange="setPrecioManual('${l.mz}','${l.lt}',+this.value)"
+            ondblclick="delPrecioManual('${l.mz}','${l.lt}',this)"
+            title="Edita para fijar precio manual. Doble clic = volver al automático"/>
+          ${tieneManual?`<span style="font-size:9px;color:#3B82F6;font-weight:700" title="Precio manual activo">M</span>`:''}
+        </div>`
+      :`<span style="font-size:11px;font-weight:700">${fmt(precio)}</span>`;
+
+    return`<tr style="${grande?'background:#FFF7ED':''}">
+      <td style="text-align:center;font-weight:700">${l.mz}</td>
+      <td style="text-align:center">${l.lt}</td>
+      <td style="text-align:right">${l.area}m²${grande?' ⭐':''}</td>
+      <td style="text-align:right">${campoPrecio}</td>
+      <td style="text-align:right;color:${tieneManual?'#1E40AF':'#666'};font-weight:${tieneManual?'700':'400'}">${fM2(m2p)}</td>
+      <td style="text-align:right;color:#92400E">${fmt(com)} <span style="font-size:9px">(${comRate}%)</span></td>
+      <td style="text-align:right">${fmt(neto)}</td>
+      <td style="min-width:200px">${attrBtns}</td>
+      <td style="text-align:center"><span class="${bc}">${l.est}</span>${l.fijo?` <span class="bg2">fijo</span>`:''}</td>
+      <td style="text-align:center">
+        ${l.est==='disponible'&&!l.fijo
+          ?`<button class="bsm bgreen" onclick="abrirModalConPrecio('${l.mz}','${l.lt}',${precio})" style="font-size:9px;padding:2px 6px">Vender</button>`
+          :l.est==='reservado'&&!l.fijo
+          ?`<div style="display:flex;flex-direction:column;gap:3px">
+              <button class="bsm bgreen" onclick="convertirReservaVenta('${l.mz}','${l.lt}')"
+                style="font-size:9px;padding:2px 6px;white-space:nowrap">✓ → Venta</button>
+              <button class="bsm" onclick="liberarReserva('${l.mz}','${l.lt}')"
+                style="font-size:9px;padding:2px 6px;border-color:#DC2626;color:#DC2626;white-space:nowrap">✕ Liberar</button>
+            </div>`
+          :'—'}
+      </td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('tab-pool').innerHTML=`
+    <div class="ai alert">
+      ⭐ Naranja = lote grande (>250m²), vender pronto. &nbsp;
+      <strong>Atributos:</strong> clic en el botón del atributo para activar/desactivar en ese lote. &nbsp;
+      <strong>Precio manual:</strong> escribe directamente en el campo (azul = manual). Doble clic para borrar y volver al automático.
+    </div>
+    <div class="card">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+        <label style="font-size:11px;font-weight:600">Manzana:</label>
+        <select id="pool-mz" onchange="renderAll()">
+          <option value="todas">Todas</option>
+          ${mzs.map(m=>`<option value="${m}" ${mzF===m?'selected':''}>${m}</option>`).join('')}
+        </select>
+        <label style="font-size:11px;font-weight:600;margin-left:6px">Estado:</label>
+        <select id="pool-est" onchange="renderAll()">
+          <option value="todos">Todos</option>
+          <option value="disponible" ${estF==='disponible'?'selected':''}>Disponibles</option>
+          <option value="vendido" ${estF==='vendido'?'selected':''}>Vendidos</option>
+          <option value="reservado" ${estF==='reservado'?'selected':''}>Reservados</option>
+        </select>
+        <span style="font-size:10px;color:#888;margin-left:auto">
+          ${filtered.length} lotes · precio activo: <strong>${fM2(TRAMOS[ta].m2Precio)}/m²</strong> (${TRAMOS[ta].label}) ·
+          ${Object.keys(PRECIO_MANUAL).length} precios manuales
+        </span>
+        <button class="bsm bred" onclick="if(confirm('¿Borrar todos los precios manuales?')){Object.keys(PRECIO_MANUAL).forEach(k=>delete PRECIO_MANUAL[k]);renderAll()}">Limpiar manuales</button>
+      </div>
+      <div class="tw"><table>
+        <thead><tr>
+          <th>Mz</th><th>Lt</th><th>Área</th>
+          <th>Precio (editable)</th><th>S/m²</th><th>Comisión</th><th>Neto</th>
+          <th>Atributos — clic para activar/desactivar</th>
+          <th>Estado</th><th>Acción</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>
+  `;
+}
+
+function toggleAttrPool(mz,lt,id){
+  const l=LOTES.find(x=>x.mz===mz&&x.lt==lt);
+  if(!l||l.fijo) return;
+  const i=(l.attrs||[]).indexOf(id);
+  if(i>=0) l.attrs.splice(i,1);
+  else{ if(!l.attrs)l.attrs=[]; l.attrs.push(id); }
+  // Si tenía precio manual, borrarlo para que recalcule con nuevos atributos
+  delete PRECIO_MANUAL[mz+'-'+lt];
+  renderAll();
+}
+
+function setPrecioManual(mz,lt,val){
+  PRECIO_MANUAL[mz+'-'+lt]=val;
+  renderAll();
+}
+
+function delPrecioManual(mz,lt,inp){
+  delete PRECIO_MANUAL[mz+'-'+lt];
+  // Recalcular precio automático y mostrarlo
+  const ta=calcTramoActivo();
+  const l=LOTES.find(x=>x.mz===mz&&x.lt==lt);
+  if(l&&inp){
+    let ap=0; (l.attrs||[]).forEach(a=>{if(ATTRS[a])ap+=ATTRS[a].pct;});
+    inp.value=Math.round(l.area*TRAMOS[ta].m2Precio*(1+ap/100));
+    inp.style.borderColor='#d1d5db';
+    inp.style.background='#fff';
+    inp.style.fontWeight='400';
+    inp.style.color='inherit';
+  }
+  renderAll();
+}
+
+// Versión del modal que acepta precio preconfigurado (desde pool)
+function abrirModalConPrecio(mz,lt,precioSugerido){
+  const l=LOTES.find(x=>x.mz===mz&&x.lt==lt); // == para comparar sin importar tipo
+  if(!l||l.fijo||(l.est!=='disponible'&&l.est!=='reservado')) return;
+  modalLote={mz,lt:+lt};
+  const ta=calcTramoActivo();
+  const precio=precioSugerido||0;
+  const com=Math.round(precio*CFG.comision/100);
+  const neto=precio-com;
+  document.getElementById('modal-title').textContent=`Registrar operación — Mz ${mz} Lt ${lt}`;
+  document.getElementById('modal-lote-info').textContent=`Manzana ${mz} · Lote ${lt}`;
+  document.getElementById('modal-area').textContent=`${l.area} m²  ${l.area>250?'⭐ Lote grande':''}`;
+  document.getElementById('modal-tramo-info').innerHTML=`${tpill(ta)} · S/${TRAMOS[ta].m2Precio}/m² base`;
+  document.getElementById('modal-precio').value=precio;
+  document.getElementById('modal-com').textContent=`${CFG.comision}% = ${fmt(com)}`;
+  document.getElementById('modal-neto').textContent=fmt(neto);
+  // Resetear a venta por defecto
+  tipoOperacion='vendido';
+  setTipoOp('vendido');
+  // Rehabilitar botón reserva
+  document.getElementById('btn-tipo-reserva').style.opacity='';
+  document.getElementById('btn-tipo-reserva').style.pointerEvents='';
+  document.getElementById('modal-precio').oninput=function(){
+    const p=+this.value;
+    const c2=Math.round(p*CFG.comision/100);
+    document.getElementById('modal-com').textContent=`${CFG.comision}% = ${fmt(c2)}`;
+    document.getElementById('modal-neto').textContent=fmt(p-c2);
+  };
+  document.getElementById('modalBg').classList.add('open');
+}
+
+// ── TAB: PARÁMETROS ───────────────────────────────────────────────────────────
+function renderParams(c){
+  const sliders=TRAMOS.map((t,i)=>`
+    <div style="background:${TBG[i]};border-radius:7px;padding:9px 11px;border-left:4px solid ${TC[i]}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:700;color:${TTC[i]}">${t.label} ${i===c.ta?'<span style="font-size:10px;background:#065F46;color:#fff;padding:1px 6px;border-radius:8px;margin-left:4px">ACTIVO</span>':''}</span>
+        <span style="font-size:10px;color:${TTC[i]}">${t.periodo} · meta ${t.m2Meta.toLocaleString()} m² · vs comp: +${Math.round((t.m2Precio-CFG.compM2)/CFG.compM2*100)}%</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <label style="font-size:10px;color:${TTC[i]};min-width:60px">S/m² precio</label>
+        <input type="range" min="80" max="500" step="1" value="${t.m2Precio}"
+          oninput="TRAMOS[${i}].m2Precio=+this.value;document.getElementById('tv${i}').textContent=this.value;renderAll()"
+          style="flex:1;accent-color:${TC[i]}"/>
+        <span style="font-size:15px;font-weight:700;color:${TTC[i]};min-width:80px;text-align:right">S/<span id="tv${i}">${t.m2Precio}</span>/m²</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:10px;color:${TTC[i]};min-width:60px">Meta m²</label>
+        <input type="number" value="${t.m2Meta}" step="100" style="width:100px;font-size:11px"
+          onchange="TRAMOS[${i}].m2Meta=+this.value;renderAll()"/>
+        <span style="font-size:10px;color:${TTC[i]}">Lote 200m²: <strong>${fmt(t.m2Precio*200)}</strong> · c/esquina: <strong>${fmt(Math.round(t.m2Precio*200*1.15))}</strong></span>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('tab-params').innerHTML=`
+    <div class="param-box">
+      <div class="st">Parámetros financieros — cambia y pulsa "Recalcular"</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end">
+        <div class="inp-grp"><label class="pl">Costo proyecto (S/)</label>
+          <input type="number" class="param" value="${CFG.costo}" step="50000"
+            onchange="CFG.costo=+this.value;recalcTramos();renderAll()"/></div>
+        <div class="inp-grp"><label class="pl">ROI objetivo (%)</label>
+          <input type="number" class="param" value="${CFG.roiMeta}" step="5" min="10" max="150"
+            onchange="CFG.roiMeta=+this.value;recalcTramos();renderAll()"/></div>
+        <div class="inp-grp"><label class="pl">IR Rég. General (%)</label>
+          <input type="number" class="param" value="${CFG.ir}" step="0.5"
+            onchange="CFG.ir=+this.value;recalcTramos();renderAll()"/></div>
+        <div class="inp-grp"><label class="pl">Comisión tramos T1–T5 (%)</label>
+          <input type="number" class="param" value="${CFG.comision}" step="1"
+            onchange="CFG.comision=+this.value;recalcTramos();renderAll()"/></div>
+        <div class="inp-grp"><label class="pl">Comisión preventa (%)</label>
+          <input type="number" class="param" value="${CFG.comFijo}" step="1" style="border-color:#F87171"
+            onchange="CFG.comFijo=+this.value;recalcTramos();renderAll()"/></div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+        <button class="btn" onclick="recalcTramos();renderAll()">↻ Recalcular precios/m² para cumplir ROI objetivo</button>
+        <span style="font-size:10px;color:#90CDF4">Fija T1 y redistribuye T2–T5 automáticamente</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="st">Precio/m² y meta de m² por tramo</div>
+      <div style="display:flex;flex-direction:column;gap:7px">${sliders}</div>
+    </div>
+    <div class="card">
+      <div class="st">Atributos de ubicación — porcentajes ajustables</div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
+        ${Object.entries(ATTRS).map(([id,a])=>`
+          <div style="background:${a.tipo==='pos'?'#EFF6FF':'#FEF2F2'};border-radius:6px;padding:8px;border-top:3px solid ${a.tipo==='pos'?'#3B82F6':'#EF4444'}">
+            <div style="font-size:10px;font-weight:700;color:${a.tipo==='pos'?'#1E3A8A':'#7F1D1D'};margin-bottom:4px">${a.tipo==='pos'?'▲':'▼'} ${a.lbl}</div>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" value="${a.pct}" min="${a.tipo==='pos'?0:-40}" max="${a.tipo==='pos'?60:0}" step="1" style="width:55px;font-size:12px"
+                onchange="ATTRS['${id}'].pct=+this.value;renderAll()"/>
+              <span style="font-size:11px;color:#666">%</span>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ── TAB: FINANCIERO ───────────────────────────────────────────────────────────
+function renderFinanciero(c){
+  // Cascada
+  const wf=[
+    {l:'Ingreso bruto total proyectado',          v:c.ingTotal,    col:'#3B82F6'},
+    {l:`− Comisión (${CFG.comFijo}% fijos + ${CFG.comision}% tramos)`, v:-c.comTotal, col:'#F87171'},
+    {l:'= Ingreso neto ventas',                   v:c.netoTotal,   col:'#6B7280'},
+    {l:'− Costo del proyecto (terreno + obras)',  v:-CFG.costo,    col:'#F87171'},
+    {l:'= Utilidad bruta',                        v:c.utilBruta,   col:c.utilBruta>0?'#34D399':'#F87171'},
+    {l:`− Impuesto a la Renta ${CFG.ir}% (Rég. General)`, v:-c.ir, col:'#F87171'},
+    {l:'= UTILIDAD NETA DEL PROYECTO',            v:c.utilNeta,    col:c.utilNeta>0?'#10B981':'#EF4444', bold:true},
+  ];
+  const maxV=Math.max(...wf.map(x=>Math.abs(x.v)));
+  const bars=wf.map(w=>{
+    const w100=Math.round(Math.abs(w.v)/maxV*100);
+    return`<div style="margin-bottom:6px">
+      <div style="font-size:11px;color:#444;margin-bottom:2px;font-weight:${w.bold?'700':'400'}">${w.l}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="flex:1;height:${w.bold?22:18}px;background:#f0f0f0;border-radius:3px;overflow:hidden">
+          <div style="width:${Math.max(w100,2)}%;height:100%;background:${w.col};border-radius:3px;display:flex;align-items:center;padding:0 6px">
+            <span style="font-size:${w.bold?10:9}px;font-weight:700;white-space:nowrap;color:${w.v>=0?'#fff':'#fff'}">${fmt(Math.abs(w.v))}</span>
+          </div>
+        </div>
+        <span style="font-size:${w.bold?12:11}px;font-weight:${w.bold?'700':'400'};color:${w.v<0?'#7F1D1D':'#1a202c'};min-width:115px;text-align:right">${w.v<0?'−':'+'}${fmt(Math.abs(w.v))}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Proyección por tramo
+  const ingCaptado=c.ingFijo+c.ingPool;
+  const tramoProy=TRAMOS.map((t,i)=>{
+    const m2v=estado.m2AcumPorTramo[i];
+    const pctComp=Math.min(100,Math.round(m2v/t.m2Meta*100));
+    const completado=m2v>=t.m2Meta;
+    const esActivo=i===c.ta&&!completado;
+    const ingT=c.ingPorTramoTotal[i];
+    const ventasT=estado.ventasRegistradas.filter(v=>v.tramo===i);
+    const ingVentasT=ventasT.reduce((s,v)=>s+v.precio,0);
+    return`<tr style="background:${completado?'#EFF6FF':esActivo?TBG[i]:'#fff'}">
+      <td>${tpill(i)} ${completado?'<span class="badge-completado">✓</span>':esActivo?'<span class="badge-activo">Activo</span>':'<span class="badge-pendiente">Pendiente</span>'}</td>
+      <td style="text-align:center">${t.periodo}</td>
+      <td style="text-align:right;font-weight:700">${fM2(t.m2Precio)}</td>
+      <td style="text-align:right">${t.m2Meta.toLocaleString()} m²</td>
+      <td style="text-align:right">${m2v.toLocaleString()} m²
+        <div style="height:5px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-top:2px">
+          <div style="width:${pctComp}%;height:100%;background:${TC[i]};border-radius:3px"></div>
+        </div>
+      </td>
+      <td style="text-align:right;color:#065F46;font-weight:700">${fmt(ingVentasT)}</td>
+      <td style="text-align:right;color:#888">${ingT>0?fmt(ingT):'—'}</td>
+      <td style="text-align:right;font-weight:700">${fmt(ingVentasT+ingT)}</td>
+    </tr>`;
+  }).join('');
+
+  const alertC=c.roi>=CFG.roiMeta?'ao':c.utilNeta>0?'aw':'ad';
+  const msg=c.roi>=CFG.roiMeta
+    ?`✓ ROI proyectado ${fp(c.roi)} — supera meta ${fp(CFG.roiMeta)}. Utilidad neta: ${fmt(c.utilNeta)}.`
+    :`⚠ ROI proyectado ${fp(c.roi)}. Falta ${fmt(c.bMeta-c.ingTotal)} de ingreso bruto para llegar a meta ${fp(CFG.roiMeta)}.`;
+
+  document.getElementById('tab-financiero').innerHTML=`
+    <div class="${alertC} alert">${msg}</div>
+
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="card">
+        <div class="st">Proyección de ingresos por tramo — captado + pendiente</div>
+        <table style="font-size:11px">
+          <thead><tr>
+            <th>Tramo</th><th>Período</th><th>S/m²</th><th>Meta m²</th>
+            <th>Avance</th><th>Captado real</th><th>Proyección rest.</th><th>Total tramo</th>
+          </tr></thead>
+          <tbody>
+            <tr style="background:#F9FAFB">
+              <td><span class="tp" style="background:#F3F4F6;color:#374151">Fijos</span> <span class="badge-completado">✓</span></td>
+              <td>Preventa</td>
+              <td style="text-align:right;color:#888">~S/93/m²</td>
+              <td style="text-align:right;color:#888">—</td>
+              <td style="text-align:right;color:#888">—</td>
+              <td style="text-align:right;color:#065F46;font-weight:700">${fmt(c.ingFijo)}</td>
+              <td style="text-align:right;color:#888">—</td>
+              <td style="text-align:right;font-weight:700">${fmt(c.ingFijo)}</td>
+            </tr>
+            ${tramoProy}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="5">TOTAL</td>
+              <td style="text-align:right">${fmt(ingCaptado)}</td>
+              <td style="text-align:right">${fmt(c.ingTotal-ingCaptado)}</td>
+              <td style="text-align:right">${fmt(c.ingTotal)}</td>
+            </tr>
+          </tfoot>
+        </table>
+        <div style="font-size:10px;color:#888;margin-top:6px">
+          La proyección restante asume que los lotes disponibles se venden en orden de mayor a menor área (lotes grandes primero), aplicando el precio del tramo que corresponda cuando se alcance cada meta de m².
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:9px">
+          <div class="st">Resumen captado vs proyectado</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <div style="background:#ECFDF5;border-radius:6px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:#065F46;margin-bottom:3px">Captado real</div>
+              <div style="font-size:16px;font-weight:700;color:#065F46">${fmt(ingCaptado)}</div>
+              <div style="font-size:10px;color:#065F46">${Math.round(ingCaptado/c.ingTotal*100)}% del total</div>
+            </div>
+            <div style="background:#EFF6FF;border-radius:6px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:#1E3A8A;margin-bottom:3px">Por captar</div>
+              <div style="font-size:16px;font-weight:700;color:#1E3A8A">${fmt(c.ingTotal-ingCaptado)}</div>
+              <div style="font-size:10px;color:#1E3A8A">${Math.round((c.ingTotal-ingCaptado)/c.ingTotal*100)}% del total</div>
+            </div>
+          </div>
+          <div style="height:12px;background:#e5e7eb;border-radius:6px;overflow:hidden;margin-bottom:4px">
+            <div style="width:${Math.round(ingCaptado/c.ingTotal*100)}%;height:100%;background:#10B981;border-radius:6px"></div>
+          </div>
+          <div style="font-size:10px;color:#888;text-align:center">${Math.round(ingCaptado/c.ingTotal*100)}% completado</div>
+        </div>
+
+        <div class="card">
+          <div class="st">Indicadores clave</div>
+          <table style="font-size:11px">
+            ${[
+              ['ROI proyectado',fp(c.roi),c.roi>=CFG.roiMeta?'#065F46':'#DC2626'],
+              ['Utilidad neta',fmt(c.utilNeta),c.utilNeta>0?'#065F46':'#7F1D1D'],
+              ['IR estimado',fmt(c.ir),'#7F1D1D'],
+              ['Margen bruto',fp(Math.round(c.utilBruta/c.ingTotal*1000)/10),'#1a202c'],
+              ['Margen neto',fp(Math.round(c.utilNeta/c.ingTotal*1000)/10),'#1a202c'],
+              ['S/m² promedio global',fM2(c.ingTotal/LOTES.reduce((s,l)=>s+l.area,0)),'#1a202c'],
+            ].map(([l,v,col])=>`<tr><td style="color:#555;padding:3px 0">${l}</td><td style="text-align:right;font-weight:700;color:${col}">${v}</td></tr>`).join('')}
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="st">Cascada financiera completa</div>
+      ${bars}
+    </div>
+  `;
+}
+
+// ── TAB: CUADRO FINAL ─────────────────────────────────────────────────────────
+function renderCuadro(c){
+  const ta=c.ta;
+  const rows=LOTES.map(l=>{
+    let ap=0; (l.attrs||[]).forEach(a=>{if(ATTRS[a])ap+=ATTRS[a].pct;});
+    const precio=l.fijo||l.precioVenta?
+      (l.precioVenta||0):
+      Math.round(l.area*TRAMOS[ta].m2Precio*(1+ap/100));
+    const comRate=l.fijo?CFG.comFijo:CFG.comision;
+    const com=Math.round(precio*comRate/100);
+    const neto=precio-com;
+    const m2b=Math.round(precio/l.area*10)/10;
+    const bc=l.est==='vendido'?'br':l.est==='reservado'?'ba':'bv';
+    const tramoLabel=l.fijo?'<span class="bg2">Fijo</span>':tpill(ta);
+    return`<tr>
+      <td>${tramoLabel}</td>
+      <td style="text-align:center;font-weight:700">${l.mz}</td>
+      <td style="text-align:center">${l.lt}</td>
+      <td style="text-align:right">${l.area}${l.area>250?' ⭐':''}</td>
+      <td style="text-align:right;font-weight:700">${fmt(precio)}</td>
+      <td style="text-align:right">${fM2(m2b)}</td>
+      <td style="text-align:right;color:#92400E">${fmt(com)} <span style="font-size:9px">(${comRate}%)</span></td>
+      <td style="text-align:right">${fmt(neto)}</td>
+      <td style="text-align:center"><span class="${bc}">${l.est}</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('tab-cuadro').innerHTML=`
+    <div class="ai alert">Precios de lotes disponibles calculados al tramo activo (${TRAMOS[ta].label} · S/${TRAMOS[ta].m2Precio}/m²). Comisión: ${CFG.comFijo}% fijos · ${CFG.comision}% pool. ⭐ = lote >250m². <button class="bsm" onclick="window.print()" style="margin-left:6px">Imprimir / PDF</button></div>
+    <div class="card"><div class="tw"><table>
+      <thead><tr><th>Tramo</th><th>Mz</th><th>Lt</th><th>m²</th><th>Precio</th><th>S/m² bruto</th><th>Comisión</th><th>Neto proyecto</th><th>Estado</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr>
+        <td colspan="4">TOTAL (112 lotes)</td>
+        <td style="text-align:right">${fmt(c.ingTotal)}</td>
+        <td></td>
+        <td style="text-align:right">${fmt(c.comTotal)}</td>
+        <td style="text-align:right">${fmt(c.netoTotal)}</td>
+        <td></td>
+      </tr></tfoot>
+    </table></div></div>
+  `;
+}
+
+// ── MÉTRICAS ──────────────────────────────────────────────────────────────────
+function renderTop(c){
+  const ta=c.ta;
+  const rc=c.roi>=CFG.roiMeta?'#065F46':c.roi>=30?'#92400E':'#7F1D1D';
+  const m2RestTramo=TRAMOS[ta].m2Meta-estado.m2AcumPorTramo[ta];
+  const gp=Math.min(100,Math.round(c.ingTotal/c.bMeta*100));
+  document.getElementById('top-m').innerHTML=`
+    <div class="met"><div class="ml">Tramo activo</div>
+      <div class="mv" style="color:${TTC[ta]};font-size:18px">${TRAMOS[ta].label} — S/${TRAMOS[ta].m2Precio}/m²</div>
+      <div class="ms">${TRAMOS[ta].periodo}</div>
+      <div class="pbar"><div class="pfill" style="width:${Math.min(100,Math.round(estado.m2AcumPorTramo[ta]/TRAMOS[ta].m2Meta*100))}%;background:${TC[ta]}"></div></div>
+      <div class="ms">Faltan ${m2RestTramo.toLocaleString()} m² para T${ta+2<6?ta+2:'fin'}</div>
+    </div>
+    <div class="met"><div class="ml">m² vendidos (pool)</div>
+      <div class="mv" style="font-size:15px">${c.m2Vendido.toLocaleString()} m²</div>
+      <div class="ms">de ${c.m2Total.toLocaleString()} m² disponibles</div>
+      <div class="pbar"><div class="pfill" style="width:${Math.round(c.m2Vendido/c.m2Total*100)}%;background:#059669"></div></div>
+    </div>
+    <div class="met"><div class="ml">Ingreso captado real</div>
+      <div class="mv" style="font-size:14px;color:#065F46">${fmt(c.ingFijo+c.ingPool)}</div>
+      <div class="ms">${c.fijos.length} fijos + ${estado.ventasRegistradas.length} nuevas ventas</div>
+    </div>
+    <div class="met" style="background:${c.roi>=CFG.roiMeta?'#ECFDF5':'#FEF2F2'}">
+      <div class="ml">ROI proyectado</div>
+      <div class="mv" style="font-size:22px;color:${rc}">${fp(c.roi)}</div>
+      <div class="ms">${c.roi>=CFG.roiMeta?'✓ Meta cumplida':'Meta: '+fp(CFG.roiMeta)}</div>
+    </div>
+    <div class="met"><div class="ml">Ingreso bruto total</div>
+      <div class="mv" style="font-size:14px">${fmt(c.ingTotal)}</div>
+      <div class="pbar"><div class="pfill" style="width:${gp}%;background:${c.gap>=0?'#10B981':'#EF4444'}"></div></div>
+      <div class="ms">${c.gap>=0?'✓ +'+fmt(c.gap)+' sobre meta':'✗ Falta '+fmt(-c.gap)}</div>
+    </div>
+  `;
+  document.getElementById('hdr').innerHTML=
+    `${TRAMOS[ta].label} activo · S/${TRAMOS[ta].m2Precio}/m²<br>ROI: ${fp(c.roi)} · ${c.m2Vendido}m² vendidos`;
+}
+
+function showTab(t,el){
+  activeTab=t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  if(el) el.classList.add('active');
+  ['dashboard','pool','params','financiero','cuadro'].forEach(id=>{
+    document.getElementById('tab-'+id).style.display=id===t?'block':'none';
+  });
+  renderAll();
+}
+
+function renderAll(){
+  const c=calcAll();
+  renderTop(c);
+  if(activeTab==='dashboard')  renderDashboard(c);
+  if(activeTab==='pool')       renderPool(c);
+  if(activeTab==='params')     renderParams(c);
+  if(activeTab==='financiero') renderFinanciero(c);
+  if(activeTab==='cuadro')     renderCuadro(c);
+}
+
+recalcTramos();
+renderAll();
+</script>
+</body>
+</html>
