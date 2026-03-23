@@ -444,30 +444,58 @@ async function publicarPrecios(){
   const btn = event.target;
   btn.textContent = '⏳ Publicando...';
   btn.disabled = true;
-  try {
-    // Usar imagen para evitar CORS — Apps Script acepta GET sin restricciones
-    const promesas = TRAMOS.map((t, i) => new Promise((resolve) => {
-      const url = `${API_SHEET}?action=actualizarTramo&tramo=${t.label}&precio=${t.m2Precio}&meta=${t.m2Meta}&t=${Date.now()+i}`;
-      const img = new Image();
-      img.onload = img.onerror = () => resolve();
-      img.src = url;
-      setTimeout(resolve, 3000); // timeout de seguridad
-    }));
-    await Promise.all(promesas);
-    btn.textContent = '✓ Publicado';
-    btn.style.background = '#065F46';
-    setTimeout(()=>{
-      btn.textContent = '🚀 Publicar precios al Sheet';
-      btn.style.background = '#059669';
-      btn.disabled = false;
-    }, 3000);
-    alert(`✓ Precios enviados al Sheet\n\nT1: S/${TRAMOS[0].m2Precio}/m²\nT2: S/${TRAMOS[1].m2Precio}/m²\nT3: S/${TRAMOS[2].m2Precio}/m²\nT4: S/${TRAMOS[3].m2Precio}/m²\nT5: S/${TRAMOS[4].m2Precio}/m²\n\nLos vendedores verán los nuevos precios en 30 segundos.`);
-  } catch(e) {
+
+  let enviados = 0;
+  const total = TRAMOS.length;
+
+  // Enviar uno por uno usando formularios ocultos
+  for(let i = 0; i < total; i++){
+    const t = TRAMOS[i];
+    await new Promise(resolve => {
+      const iframe = document.createElement('iframe');
+      iframe.name = 'fr'+i;
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = API_SHEET;
+      form.target = 'fr'+i;
+      form.style.display = 'none';
+
+      const addField = (name, value) => {
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = name;
+        inp.value = value;
+        form.appendChild(inp);
+      };
+
+      addField('action', 'actualizarTramo');
+      addField('tramo', t.label);
+      addField('precio', t.m2Precio);
+      addField('meta', t.m2Meta);
+
+      document.body.appendChild(form);
+      form.submit();
+
+      setTimeout(() => {
+        document.body.removeChild(form);
+        document.body.removeChild(iframe);
+        enviados++;
+        resolve();
+      }, 800);
+    });
+  }
+
+  btn.textContent = '✓ Publicado';
+  btn.style.background = '#065F46';
+  setTimeout(()=>{
     btn.textContent = '🚀 Publicar precios al Sheet';
     btn.style.background = '#059669';
     btn.disabled = false;
-    alert('Error al publicar. Verifica tu conexión.');
-  }
+  }, 3000);
+  alert(`✓ Precios enviados al Sheet\n\nT1: S/${TRAMOS[0].m2Precio}/m²\nT2: S/${TRAMOS[1].m2Precio}/m²\nT3: S/${TRAMOS[2].m2Precio}/m²\nT4: S/${TRAMOS[3].m2Precio}/m²\nT5: S/${TRAMOS[4].m2Precio}/m²\n\nVerifica en el Sheet que los valores cambiaron.`);
 }
 const fmt=n=>'S/ '+Math.round(n).toLocaleString('es-PE');
 const fM2=n=>'S/ '+(Math.round(n*10)/10).toFixed(1);
