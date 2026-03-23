@@ -472,6 +472,7 @@ async function publicarPrecios(){
     alert('No se pudo conectar al Sheet. Verifica tu conexión a internet.');
   }
 }
+const fmt=n=>'S/ '+Math.round(n).toLocaleString('es-PE');
 const fM2=n=>'S/ '+(Math.round(n*10)/10).toFixed(1);
 const fp =n=>(Math.round(n*10)/10)+'%';
 
