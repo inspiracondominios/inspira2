@@ -445,13 +445,11 @@ async function publicarPrecios(){
   btn.textContent = '⏳ Publicando...';
   btn.disabled = true;
   try {
-    const promesas = TRAMOS.map(t =>
-      fetch(API_SHEET, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({action:'actualizarTramo', tramo:t.label, precio:t.m2Precio, meta:t.m2Meta})
-      }).then(r=>r.json())
-    );
+    // Usar GET con parámetros para evitar CORS
+    const promesas = TRAMOS.map(t => {
+      const url = `${API_SHEET}?action=actualizarTramo&tramo=${t.label}&precio=${t.m2Precio}&meta=${t.m2Meta}`;
+      return fetch(url).then(r=>r.json());
+    });
     await Promise.all(promesas);
     btn.textContent = '✓ Publicado exitosamente';
     btn.style.background = '#065F46';
@@ -460,7 +458,7 @@ async function publicarPrecios(){
       btn.style.background = '#059669';
       btn.disabled = false;
     }, 3000);
-    alert(`✓ Precios publicados correctamente\n\nT1: S/${TRAMOS[0].m2Precio}/m²\nT2: S/${TRAMOS[1].m2Precio}/m²\nT3: S/${TRAMOS[2].m2Precio}/m²\nT4: S/${TRAMOS[3].m2Precio}/m²\nT5: S/${TRAMOS[4].m2Precio}/m²\n\nLos vendedores verán los nuevos precios en menos de 30 segundos.`);
+    alert(`✓ Precios publicados\n\nT1: S/${TRAMOS[0].m2Precio}/m²\nT2: S/${TRAMOS[1].m2Precio}/m²\nT3: S/${TRAMOS[2].m2Precio}/m²\nT4: S/${TRAMOS[3].m2Precio}/m²\nT5: S/${TRAMOS[4].m2Precio}/m²\n\nLos vendedores verán los nuevos precios en menos de 30 segundos.`);
   } catch(e) {
     btn.textContent = '✗ Error — verifica conexión';
     btn.style.background = '#DC2626';
@@ -469,7 +467,7 @@ async function publicarPrecios(){
       btn.textContent = '🚀 Publicar precios al Sheet';
       btn.style.background = '#059669';
     }, 3000);
-    alert('No se pudo conectar al Sheet. Verifica tu conexión a internet.');
+    alert('No se pudo conectar al Sheet.');
   }
 }
 const fmt=n=>'S/ '+Math.round(n).toLocaleString('es-PE');
