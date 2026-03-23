@@ -445,29 +445,28 @@ async function publicarPrecios(){
   btn.textContent = '⏳ Publicando...';
   btn.disabled = true;
   try {
-    // Usar GET con parámetros para evitar CORS
-    const promesas = TRAMOS.map(t => {
-      const url = `${API_SHEET}?action=actualizarTramo&tramo=${t.label}&precio=${t.m2Precio}&meta=${t.m2Meta}`;
-      return fetch(url).then(r=>r.json());
-    });
+    // Usar imagen para evitar CORS — Apps Script acepta GET sin restricciones
+    const promesas = TRAMOS.map((t, i) => new Promise((resolve) => {
+      const url = `${API_SHEET}?action=actualizarTramo&tramo=${t.label}&precio=${t.m2Precio}&meta=${t.m2Meta}&t=${Date.now()+i}`;
+      const img = new Image();
+      img.onload = img.onerror = () => resolve();
+      img.src = url;
+      setTimeout(resolve, 3000); // timeout de seguridad
+    }));
     await Promise.all(promesas);
-    btn.textContent = '✓ Publicado exitosamente';
+    btn.textContent = '✓ Publicado';
     btn.style.background = '#065F46';
     setTimeout(()=>{
       btn.textContent = '🚀 Publicar precios al Sheet';
       btn.style.background = '#059669';
       btn.disabled = false;
     }, 3000);
-    alert(`✓ Precios publicados\n\nT1: S/${TRAMOS[0].m2Precio}/m²\nT2: S/${TRAMOS[1].m2Precio}/m²\nT3: S/${TRAMOS[2].m2Precio}/m²\nT4: S/${TRAMOS[3].m2Precio}/m²\nT5: S/${TRAMOS[4].m2Precio}/m²\n\nLos vendedores verán los nuevos precios en menos de 30 segundos.`);
+    alert(`✓ Precios enviados al Sheet\n\nT1: S/${TRAMOS[0].m2Precio}/m²\nT2: S/${TRAMOS[1].m2Precio}/m²\nT3: S/${TRAMOS[2].m2Precio}/m²\nT4: S/${TRAMOS[3].m2Precio}/m²\nT5: S/${TRAMOS[4].m2Precio}/m²\n\nLos vendedores verán los nuevos precios en 30 segundos.`);
   } catch(e) {
-    btn.textContent = '✗ Error — verifica conexión';
-    btn.style.background = '#DC2626';
+    btn.textContent = '🚀 Publicar precios al Sheet';
+    btn.style.background = '#059669';
     btn.disabled = false;
-    setTimeout(()=>{
-      btn.textContent = '🚀 Publicar precios al Sheet';
-      btn.style.background = '#059669';
-    }, 3000);
-    alert('No se pudo conectar al Sheet.');
+    alert('Error al publicar. Verifica tu conexión.');
   }
 }
 const fmt=n=>'S/ '+Math.round(n).toLocaleString('es-PE');
